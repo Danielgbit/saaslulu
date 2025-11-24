@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useMemo } from "react";
 
-export function ServicesList({ completedServices }: { completedServices: any[] }) {
+export function IncomeSummary({ completedServices }: { completedServices: any[] }) {
     const [filter, setFilter] = useState<"day" | "week" | "month">("month");
 
     const money = (v: number) =>
@@ -12,14 +12,7 @@ export function ServicesList({ completedServices }: { completedServices: any[] }
             minimumFractionDigits: 0,
         }).format(v);
 
-    const formatDate = (date: string) =>
-        new Intl.DateTimeFormat("es-CO", {
-            dateStyle: "medium",
-            timeStyle: "short",
-        }).format(new Date(date));
-
-    // Filtrar servicios según día, semana o mes
-    const filteredServices = useMemo(() => {
+    const filtered = useMemo(() => {
         const now = new Date();
 
         return completedServices.filter((s) => {
@@ -32,34 +25,29 @@ export function ServicesList({ completedServices }: { completedServices: any[] }
                         date.getMonth() === now.getMonth() &&
                         date.getFullYear() === now.getFullYear()
                     );
-
                 case "week": {
-                    // Inicio de semana (domingo)
                     const startOfWeek = new Date(now);
                     startOfWeek.setDate(now.getDate() - now.getDay());
-                    startOfWeek.setHours(0, 0, 0, 0);
 
                     return date >= startOfWeek && date <= now;
                 }
-
                 case "month":
                     return (
                         date.getMonth() === now.getMonth() &&
                         date.getFullYear() === now.getFullYear()
                     );
-
-                default:
-                    return true;
             }
         });
     }, [filter, completedServices]);
 
-    return (
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl">
-            {/* Título + Filtros */}
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Servicios realizados</h2>
+    const total = filtered.reduce((acc, s) => acc + s.service_price, 0);
 
+    return (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl mb-10">
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Total ingresos</h2>
+
+                {/* Filtros */}
                 <div className="flex gap-2">
                     {["day", "week", "month"].map((f) => (
                         <button
@@ -79,35 +67,13 @@ export function ServicesList({ completedServices }: { completedServices: any[] }
                 </div>
             </div>
 
-            {/* Lista */}
-            <div className="space-y-3">
-                {filteredServices.map((s) => (
-                    <div
-                        key={s.id}
-                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-700 transition"
-                    >
-                        <div>
-                            <p className="font-semibold text-gray-900 dark:text-gray-100">
-                                {s.service_name}
-                            </p>
+            <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                {money(total)}
+            </p>
 
-                            <p className="text-gray-500 text-sm">
-                                {formatDate(s.completed_at)}
-                            </p>
-                        </div>
-
-                        <p className="font-bold text-indigo-600 dark:text-indigo-400">
-                            {money(s.service_price)}
-                        </p>
-                    </div>
-                ))}
-
-                {filteredServices.length === 0 && (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-4">
-                        No hay servicios para este periodo.
-                    </p>
-                )}
-            </div>
+            <p className="text-sm text-gray-500 mt-2">
+                {filtered.length} servicios registrados
+            </p>
         </div>
     );
 }

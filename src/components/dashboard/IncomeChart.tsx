@@ -9,11 +9,14 @@ import {
     Tooltip,
 } from "recharts";
 
-export function IncomeChart() {
-    const mockData = Array.from({ length: 6 }).map((_, i) => ({
-        month: ["Ene", "Feb", "Mar", "Abr", "May", "Jun"][i],
-        income: Math.floor(Math.random() * 800) + 200,
-    }));
+export function IncomeChart({ data }: { data: any[] }) {
+
+    const moneyFormatter = (value: number) =>
+        new Intl.NumberFormat("es-CO", {
+            style: "currency",
+            currency: "COP",
+            minimumFractionDigits: 0,
+        }).format(value);
 
     return (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl mb-10">
@@ -21,11 +24,22 @@ export function IncomeChart() {
 
             <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={mockData}>
+                    <BarChart data={data}>
                         <XAxis dataKey="month" stroke="#aaa" />
-                        <YAxis stroke="#aaa" />
-                        <Tooltip />
-                        <Bar dataKey="income" />
+
+                        {/* Formatea valores del eje Y */}
+                        <YAxis
+                            stroke="#430f64ff"
+                            tickFormatter={moneyFormatter}
+                        />
+
+                        {/* Formatea tooltip con COP */}
+                        <Tooltip
+                            formatter={(value) => moneyFormatter(Number(value))}
+                            labelFormatter={(label) => `Mes: ${label}`}
+                        />
+
+                        <Bar dataKey="income" fill="#890de7ff" />
                     </BarChart>
                 </ResponsiveContainer>
             </div>
