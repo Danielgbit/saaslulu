@@ -5,7 +5,7 @@ import { supabaseClient } from "@/lib/supabaseClient";
 import {
     getEmployeeAppointments,
     getEmployeeByUserId,
-} from "@/services/dashboardService";
+} from "@/services/dashboard.service";
 
 export function useDashboard() {
     const [loading, setLoading] = useState(true);
