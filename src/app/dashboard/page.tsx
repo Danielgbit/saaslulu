@@ -6,6 +6,7 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { IncomeChart } from "@/components/dashboard/IncomeChart";
 import { ServicesList } from "@/components/dashboard/ServiceList";
 import { IncomeSummary } from "@/components/dashboard/IncomeSummary";
+import ChatN8N from "@/components/ChatN8N";
 
 export default function DashboardPage() {
     const { loading, employee, completedServices, totalIncome, monthlyIncome } = useDashboard();
@@ -24,6 +25,7 @@ export default function DashboardPage() {
             <StatsCards completedServices={completedServices} totalIncome={totalIncome} />
             <IncomeChart data={monthlyIncome} />
             <ServicesList completedServices={completedServices} />
+            <ChatN8N />
         </div>
     );
 }
