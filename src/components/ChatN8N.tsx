@@ -30,7 +30,7 @@ export default function ChatN8N() {
         setLoading(true);
 
         try {
-            const res = await fetch("/api", {
+            const res = await fetch("/api/send", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -124,8 +124,8 @@ export default function ChatN8N() {
                                 <div
                                     key={i}
                                     className={`p-3 rounded-xl max-w-[80%] ${msg.sender === "user"
-                                            ? "bg-indigo-600 text-white self-end ml-auto"
-                                            : "bg-gray-200 dark:bg-gray-700 dark:text-white"
+                                        ? "bg-indigo-600 text-white self-end ml-auto"
+                                        : "bg-gray-200 dark:bg-gray-700 dark:text-white"
                                         }`}
                                 >
                                     {msg.text}
