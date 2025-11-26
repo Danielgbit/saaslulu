@@ -7,15 +7,16 @@ import {
     FileText,
     Bell,
     Settings,
-    Menu
+    Menu,
+    Crosshair
 } from "lucide-react";
 
 const menuItems = [
     { name: "Dashboard", icon: Home, href: "/dashboard" },
-    { name: "Sheets", icon: FileText, href: "/dashboard/sheets" },
-    { name: "Files", icon: FileText, href: "/dashboard/files" },
-    { name: "Notifications", icon: Bell, href: "/dashboard/notifications" },
-    { name: "Settings", icon: Settings, href: "/dashboard/settings" },
+    { name: "Empleados", icon: FileText, href: "/dashboard/earnings" },
+    { name: "Notificaciones", icon: Bell, href: "/dashboard/notifications" },
+    { name: "Servicios", icon: Crosshair, href: "/dashboard/services-completed" },
+    { name: "Configuración", icon: Settings, href: "/dashboard/settings" },
 ];
 
 export default function Sidebar() {
@@ -28,8 +29,8 @@ export default function Sidebar() {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-5 border-b border-white/10">
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg"></div>
-                    {open && <h1 className="font-bold text-lg">CONSTRUCTION</h1>}
+                    {open && <div className="w-8 h-8 bg-blue-500 rounded-lg"></div>}
+                    {open && <h1 className="font-bold text-lg">LULU</h1>}
                 </div>
 
                 <button onClick={() => setOpen(!open)}>
