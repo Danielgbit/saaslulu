@@ -1,171 +1,95 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useChat } from "@/hooks/useChat";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X } from "lucide-react";
+import { MessageCircle, X, SendHorizonal } from "lucide-react";
+import { useState } from "react";
+import { TypingLoader } from "./loadings/TypingLoader";
+import { Trash2 } from "lucide-react";
 
-/**
- * @component ChatN8N
- * @description Floating chat widget that communicates with the internal Next.js API,
- * then receives asynchronous replies from n8n via a polling listener (GET /api/reply).
- */
+
 export default function ChatN8N() {
     const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState<{ sender: "user" | "bot"; text: string }[]>([]);
+    const { messages, loading, sendMessage, clearChat, messagesEndRef } = useChat();
     const [input, setInput] = useState("");
-    const [loading, setLoading] = useState(false);
 
-    /**
-     * @function sendMessage
-     * @description Sends the user's message to the Next.js API, which relays it to n8n.
-     */
-    async function sendMessage() {
-        if (!input.trim()) return;
 
-        // Add user message to chat UI
-        setMessages(prev => [...prev, { sender: "user", text: input }]);
-
-        const userMessage = input;
-        setInput("");
-        setLoading(true);
-
-        try {
-            const res = await fetch("/api/send", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    message: userMessage,
-                }),
-            });
-
-            const data = await res.json();
-
-            // Add immediate bot response (if API returns any)
-            if (data.reply) {
-                setMessages(prev => [...prev, { sender: "bot", text: data.reply }]);
-            }
-        } catch (error) {
-            setMessages(prev => [
-                ...prev,
-                { sender: "bot", text: "Error: Unable to connect to AI server." },
-            ]);
-        }
-
-        setLoading(false);
-    }
-
-    /**
-     * @effect Polling listener for incoming replies from n8n.
-     * Fetches GET /api/reply every 1 second.
-     * Adds new bot messages only when they are not already present in UI.
-     */
-    useEffect(() => {
-        const interval = setInterval(async () => {
-            try {
-                const res = await fetch("/api/reply");
-                if (!res.ok) return;
-
-                const data = await res.json();
-
-                // Ignore empty or undefined replies
-                if (!data.reply) return;
-
-                // Prevent duplicate messages
-                setMessages(prev => {
-                    const exists = prev.some(
-                        msg => msg.text === data.reply && msg.sender === "bot"
-                    );
-                    if (exists) return prev;
-
-                    return [...prev, { sender: "bot", text: data.reply }];
-                });
-            } catch (_) {
-                // silent fail – prevents UI noise
-            }
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, []);
 
     return (
         <>
-            {/* Floating Button */}
-            <button
-                onClick={() => setOpen(true)}
-                className="fixed bottom-6 right-6 z-50 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-xl transition"
-            >
-                <MessageCircle size={28} />
-            </button>
+            {/* Floating button */}
+            {!open && (
+                <motion.button
+                    onClick={() => setOpen(true)}
+                    className="fixed bottom-6 right-6 bg-indigo-600 text-white p-4 rounded-full"
+                >
+                    <MessageCircle size={26} />
+                </motion.button>
+            )}
 
-            {/* Sliding Panel */}
             <AnimatePresence>
                 {open && (
-                    <motion.div
-                        initial={{ x: "100%" }}
-                        animate={{ x: 0 }}
-                        exit={{ x: "100%" }}
-                        transition={{ type: "spring", stiffness: 260, damping: 25 }}
-                        className="fixed top-0 right-0 w-[400px] max-w-[90%] h-full bg-white dark:bg-gray-900 shadow-2xl z-50 flex flex-col"
-                    >
+                    <motion.div className="fixed bottom-0 right-0 w-[400px] h-[70%] bg-white dark:bg-gray-900 flex flex-col rounded-t-2xl shadow-xl">
+
                         {/* Header */}
-                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                            <h2 className="text-lg font-semibold">Asistente Lulu AI</h2>
+                        <div className="p-4 border-b flex justify-between items-center">
+                            <h2 className="text-lg font-semibold">Sofia IA</h2>
+
                             <button
-                                onClick={() => setOpen(false)}
-                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                onClick={clearChat}
+                                className="flex items-center gap-1 text-sm text-gray-500 hover:text-red-600 transition font-medium"
                             >
+                                <Trash2 size={16} />
+                                Limpiar
+                            </button>
+
+                            <button onClick={() => setOpen(false)}>
                                 <X size={20} />
                             </button>
                         </div>
 
                         {/* Messages */}
-                        <div className="flex-1 p-4 overflow-y-auto space-y-3">
+                        <div className="flex-1 px-4 py-3 overflow-y-auto space-y-3">
                             {messages.map((msg, i) => (
                                 <div
                                     key={i}
-                                    className={`p-3 rounded-xl max-w-[80%] ${msg.sender === "user"
-                                        ? "bg-indigo-600 text-white self-end ml-auto"
-                                        : "bg-gray-200 dark:bg-gray-700 dark:text-white"
+                                    className={`p-3 text-sm rounded-xl max-w-[80%] ${msg.sender === "user"
+                                        ? "bg-indigo-600 text-white ml-auto"
+                                        : "bg-gray-300 dark:bg-gray-700 text-white"
                                         }`}
                                 >
                                     {msg.text}
                                 </div>
                             ))}
 
-                            {loading && (
-                                <div className="text-sm text-gray-500">Escribiendo...</div>
-                            )}
+                            {loading && <TypingLoader />}
+                            <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input Box */}
-                        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                            <div className="flex gap-2">
+                        {/* Input */}
+                        <div className="p-3 border-t">
+                            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-2 rounded-xl">
                                 <input
                                     value={input}
                                     onChange={e => setInput(e.target.value)}
-                                    onKeyDown={e => e.key === "Enter" && sendMessage()}
-                                    className="flex-1 p-3 rounded-lg bg-gray-100 dark:bg-gray-800 dark:text-white outline-none"
+                                    onKeyDown={e => e.key === "Enter" && sendMessage(input)}
+                                    className="flex-1 bg-transparent outline-none"
                                     placeholder="Escribe un mensaje..."
                                 />
                                 <button
-                                    onClick={sendMessage}
-                                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-lg"
+                                    onClick={() => {
+                                        sendMessage(input);
+                                        setInput("");
+                                    }}
                                 >
-                                    Enviar
+                                    <SendHorizonal size={20} />
                                 </button>
                             </div>
                         </div>
+
                     </motion.div>
                 )}
             </AnimatePresence>
-
-            {/* Backdrop */}
-            {open && (
-                <div
-                    onClick={() => setOpen(false)}
-                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
-                />
-            )}
         </>
     );
 }

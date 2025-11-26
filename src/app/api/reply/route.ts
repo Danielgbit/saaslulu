@@ -1,11 +1,5 @@
-/**
- * @fileoverview API Route: Receives reply messages sent from n8n.
- * Stores the reply in memory so the UI can retrieve it.
- */
-
 import { NextResponse } from "next/server";
 
-// In-memory store (resets only when server restarts)
 let lastReply: { sender: string; reply: string } | null = null;
 
 export async function POST(request: Request) {
@@ -20,12 +14,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // Save reply so UI can poll it
         lastReply = { sender, reply };
-
-        console.log("📩 Incoming reply from n8n:");
-        console.log("Sender:", sender);
-        console.log("Reply:", reply);
 
         return NextResponse.json({
             status: "success",
@@ -39,7 +28,11 @@ export async function POST(request: Request) {
     }
 }
 
-// Endpoint for UI polling
 export async function GET() {
     return NextResponse.json(lastReply || {});
+}
+
+export async function DELETE() {
+    lastReply = null;
+    return NextResponse.json({ success: true });
 }
