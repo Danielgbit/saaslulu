@@ -16,6 +16,7 @@ const menuItems = [
     { name: "Empleados", icon: FileText, href: "/dashboard/earnings" },
     { name: "Notificaciones", icon: Bell, href: "/dashboard/notifications" },
     { name: "Servicios", icon: Crosshair, href: "/dashboard/services-completed" },
+    { name: "Citas", icon: Crosshair, href: "/appointments" },
     { name: "Configuración", icon: Settings, href: "/dashboard/settings" },
 ];
 
