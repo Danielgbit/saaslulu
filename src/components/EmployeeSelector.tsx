@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useEmployeeSelector } from "@/hooks/useEmployeeSelector";
+import { useEmployeeSelector } from "@/hooks/employees/useEmployeeSelector";
 import { UserCheck } from "lucide-react";
 
 export function EmployeeSelector() {
@@ -39,8 +39,8 @@ export function EmployeeSelector() {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setSelected(emp.id)}
                         className={`cursor-pointer p-4 rounded-xl border flex items-center gap-3 transition ${selected === emp.id
-                                ? "bg-blue-600 text-white border-blue-700"
-                                : "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-white"
+                            ? "bg-blue-600 text-white border-blue-700"
+                            : "bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-white"
                             }`}
                     >
                         <UserCheck />

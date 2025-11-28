@@ -6,8 +6,8 @@
  * Clean and modern layout with Colombian currency formatting.
  */
 
-import { useEmployees } from "@/hooks/useEmployees";
-import { useEmployeeEarnings } from "@/hooks/useEmployeeEarnings";
+import { useEmployees } from "@/hooks/employees/useEmployees";
+import { useEmployeeEarnings } from "@/hooks/employees/useEmployeeEarnings";
 import { useState } from "react";
 
 // Helper: Format number as Colombian Peso

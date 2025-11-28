@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Mail, Lock, ShieldCheck } from "lucide-react";
-import { useRegister } from "@/hooks/useRegister";
+import { useRegister } from "@/hooks/auth/useRegister";
 
 export function RegisterForm() {
     const {

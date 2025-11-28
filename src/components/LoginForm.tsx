@@ -1,6 +1,6 @@
 "use client";
 
-import { useLogin } from "@/hooks/useLogin";
+import { useLogin } from "@/hooks/auth/useLogin";
 import { motion } from "framer-motion";
 
 export function LoginForm() {
