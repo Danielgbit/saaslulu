@@ -14,13 +14,18 @@ export const useTodayAppointments = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
             const result = await getTodayAppointments();
             setAppointments(result);
-            setLoading(false);
+            setLoading(false)
         };
 
+        // First load
         fetchData();
+
+        // Auto-refresh every 30 seconds
+        const interval = setInterval(fetchData, 30000);
+
+        return () => clearInterval(interval);
     }, []);
 
     return { appointments, loading };

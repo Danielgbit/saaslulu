@@ -1,36 +1,40 @@
-/**
- * Appointments Service
- * Handles all database queries related to appointments.
- */
-
 import { supabaseClient } from "@/lib/supabaseClient";
 import type { AppointmentRow } from "@/types/appointmentRow ";
 
 export const getTodayAppointments = async (): Promise<AppointmentRow[]> => {
-    const today = new Date().toISOString().split("T")[0];
+  // Create start and end of day in UTC
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(now.getUTCDate()).padStart(2, "0");
 
-    const { data, error } = await supabaseClient
-        .from("appointments")
-        .select(`
+  const startOfDayUTC = `${year}-${month}-${day}T00:00:00+00:00`;
+  const endOfDayUTC = `${year}-${month}-${day}T23:59:59+00:00`;
+
+  const { data, error } = await supabaseClient
+    .from("appointments")
+    .select(
+      `
       id,
       client_name,
       client_phone,
       status,
-      appointment_date,
-      start_time,
-      end_time,
+      start_at,
+      end_at,
       services (
         name,
         duration_minutes
       )
-    `)
-        .eq("appointment_date", today)
-        .order("start_time", { ascending: true });
+    `
+    )
+    .gte("start_at", startOfDayUTC)
+    .lte("start_at", endOfDayUTC)
+    .order("start_at", { ascending: true });
 
-    if (error) {
-        console.error("❌ Error loading today's appointments", error);
-        return [];
-    }
+  if (error) {
+    console.error("❌ Error loading today's appointments", error);
+    return [];
+  }
 
-    return data as AppointmentRow[];
+  return data as AppointmentRow[];
 };

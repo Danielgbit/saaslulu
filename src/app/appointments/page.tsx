@@ -1,17 +1,13 @@
 "use client";
 
 /**
- * Enhanced AppointmentsPage component with improved UX/UI.
- * - Uses cleaner layout structure and card components.
- * - Adds subtle hover effects, spacing, and typography improvements.
- * - Displays appointment info in a more visually appealing way.
- * All comments are in English following user preferences.
+ * Enhanced AppointmentsPage component aligned with updated database structure.
+ * - Uses start_at and end_at timestamps instead of separate date/time fields.
+ * - Ensures all comments are in English following user preferences.
  */
 
 import { useTodayAppointments } from "@/hooks/employees/useTodayAppointments";
-import { combineDateTime } from "@/lib/dateUtils";
 import StatusBadge from "@/components/ui/StatusBadge";
-
 
 export default function AppointmentsPage() {
     // Retrieve today's appointments and loading state
@@ -39,12 +35,9 @@ export default function AppointmentsPage() {
             {/* Appointment list */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {appointments.map((appt) => {
-                    // Combine dates with times for proper display
-                    const start = combineDateTime(
-                        appt.appointment_date,
-                        appt.start_time
-                    );
-                    const end = combineDateTime(appt.appointment_date, appt.end_time);
+                    // Convert timestamps to Date objects
+                    const start = new Date(appt.start_at);
+                    const end = new Date(appt.end_at);
 
                     return (
                         <div
@@ -56,12 +49,12 @@ export default function AppointmentsPage() {
                                 <p className="font-semibold text-black text-lg">
                                     {start.toLocaleTimeString("es-CO", {
                                         hour: "2-digit",
-                                        minute: "2-digit"
-                                    })}
-                                    {" "}—{" "}
+                                        minute: "2-digit",
+                                    })}{" "}
+                                    —{" "}
                                     {end.toLocaleTimeString("es-CO", {
                                         hour: "2-digit",
-                                        minute: "2-digit"
+                                        minute: "2-digit",
                                     })}
                                 </p>
 
@@ -74,7 +67,9 @@ export default function AppointmentsPage() {
                                 <p className="text-gray-800 font-medium">
                                     {appt.client_name ?? "Sin nombre"}
                                 </p>
-                                <p className="text-gray-500 text-sm">Tel: {appt.client_phone}</p>
+                                <p className="text-gray-500 text-sm">
+                                    Tel: {appt.client_phone}
+                                </p>
                             </div>
                         </div>
                     );
