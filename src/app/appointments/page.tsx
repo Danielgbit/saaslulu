@@ -1,19 +1,25 @@
+// File: app/appointments/page.tsx
+// Description: Appointments page, now using the modular AppointmentCard component.
+// All comments are written in English.
+
+
 "use client";
 
-/**
- * Enhanced AppointmentsPage component aligned with updated database structure.
- * - Uses start_at and end_at timestamps instead of separate date/time fields.
- * - Ensures all comments are in English following user preferences.
- */
 
 import { useTodayAppointments } from "@/hooks/employees/useTodayAppointments";
-import StatusBadge from "@/components/ui/StatusBadge";
+import AppointmentCard from "@/components/appointments/AppointmentCard";
 
+
+/**
+* AppointmentsPage Component
+* Displays all today's appointments using the reusable AppointmentCard component.
+*/
 export default function AppointmentsPage() {
-    // Retrieve today's appointments and loading state
+    // Retrieve today's appointments
     const { appointments, loading } = useTodayAppointments();
 
-    // Show loading state
+
+    // Loading state
     if (loading) {
         return (
             <div className="p-8">
@@ -22,58 +28,24 @@ export default function AppointmentsPage() {
         );
     }
 
+
     return (
         <div className="p-8 space-y-6">
             {/* Page title */}
             <h1 className="text-3xl font-bold tracking-tight mb-4">Citas de Hoy</h1>
+
 
             {/* No appointments message */}
             {appointments.length === 0 && (
                 <p className="text-gray-500 text-lg">No hay citas hoy.</p>
             )}
 
-            {/* Appointment list */}
+
+            {/* Appointment cards grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {appointments.map((appt) => {
-                    // Convert timestamps to Date objects
-                    const start = new Date(appt.start_at);
-                    const end = new Date(appt.end_at);
-
-                    return (
-                        <div
-                            key={appt.id}
-                            className="bg-violet-200 rounded-xl shadow-md p-5 hover:shadow-lg transition-shadow border border-gray-100"
-                        >
-                            <div className="flex items-start justify-between mb-3">
-                                {/* Appointment time range */}
-                                <p className="font-semibold text-black text-lg">
-                                    {start.toLocaleTimeString("es-CO", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}{" "}
-                                    —{" "}
-                                    {end.toLocaleTimeString("es-CO", {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
-                                </p>
-
-                                {/* Status badge */}
-                                <StatusBadge status={appt.status} />
-                            </div>
-
-                            {/* Client info */}
-                            <div className="space-y-1">
-                                <p className="text-gray-800 font-medium">
-                                    {appt.client_name ?? "Sin nombre"}
-                                </p>
-                                <p className="text-gray-500 text-sm">
-                                    Tel: {appt.client_phone}
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
+                {appointments.map((appt) => (
+                    <AppointmentCard key={appt.id} appt={appt} />
+                ))}
             </div>
         </div>
     );
