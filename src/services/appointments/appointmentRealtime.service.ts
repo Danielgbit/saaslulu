@@ -1,5 +1,5 @@
 import { Appointment } from "@/types/appointments";
-import { supabaseClient } from "../lib/supabaseClient";
+import { supabaseClient } from "../../lib/supabaseClient";
 import { AppointmentScheduler } from "./appointmentScheduler.service";
 
 

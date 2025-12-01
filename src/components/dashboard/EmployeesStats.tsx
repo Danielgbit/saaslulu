@@ -2,14 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabaseClient";
+import { EmployeeStats } from "@/types/EmployeeStats";
 
-interface EmployeeStats {
-    employee_id: string;
-    full_name: string;
-    total_day: number;
-    total_week: number;
-    total_month: number;
-}
 
 export default function EmployeesStats() {
     const [employees, setEmployees] = useState<EmployeeStats[]>([]);

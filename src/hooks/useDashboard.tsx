@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabaseClient } from "@/lib/supabaseClient";
-import { getEmployeeByUserId } from "@/services/dashboard.service";
+import { getEmployeeByUserId } from "@/services/dashboard/dashboard.service";
 import { useEmployeeCompletedServices } from "@/hooks/employees/useEmployeeCompletedServices";
 
 export function useDashboard() {

@@ -1,6 +1,6 @@
 // Handles completion of a single service
 
-import { saveCompletedService } from "@/services/servicesEmployeeCompleted.service";
+import { saveCompletedService } from "@/services/services/servicesEmployeeCompleted.service";
 import { useState } from "react";
 
 // (acción: save services)
