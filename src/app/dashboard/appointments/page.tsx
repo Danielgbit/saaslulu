@@ -6,15 +6,22 @@ import AppointmentCard from "@/components/appointments/AppointmentCard";
 import ConfirmationModal from "@/components/appointments/ConfirmationModal";
 import AddExtraServiceModal from "@/components/appointments/AddExtraServiceModal";
 import { completeAppointmentWithServices } from "@/app/api/appointments";
-import type { Appointment, Service } from "@/types/appointments";
+import type { Appointment } from "@/types/appointments";
+import { Service } from "@/types/services";
+
 
 export default function AppointmentsPage() {
     const { appointments, loading, error, justCompleted, setJustCompleted } = useTodayAppointments();
+
+
 
     const [selected, setSelected] = useState<Appointment | null>(null);
     const [selectedServices, setSelectedServices] = useState<Service[]>([]);
     const [extraOpen, setExtraOpen] = useState(false);
     const [saving, setSaving] = useState(false);
+
+    console.log(appointments);
+
 
     const openFor = (appt: Appointment) => {
         setSelected(appt);

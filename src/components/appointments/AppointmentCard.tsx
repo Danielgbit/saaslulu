@@ -27,13 +27,6 @@ export default function AppointmentCard({ appointment, onClick }: Props) {
 
     // Formato unificado para mostrar
     const services = [
-        ...scheduled.map((s) => ({
-            id: s.id,
-            name: s.name,
-            price: Number(s.price),
-            duration_minutes: Number(s.duration_minutes),
-            isCompleted: false,
-        })),
         ...completed.map((s) => ({
             id: s.id,
             name: s.service_name,
@@ -43,9 +36,10 @@ export default function AppointmentCard({ appointment, onClick }: Props) {
         })),
     ];
 
-    // Totales
-    const totalPrice = services.reduce((sum, s) => sum + (s.price ?? 0), 0);
-    const totalDuration = services.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0);
+    const completedOnly = services.filter((s) => s.isCompleted);
+    const totalPrice = completedOnly.reduce((sum, s) => sum + (s.price ?? 0), 0);
+    const totalDuration = completedOnly.reduce((sum, s) => sum + (s.duration_minutes ?? 0), 0);
+
 
     return (
         <div

@@ -16,7 +16,7 @@ export default function AddExtraServiceModal({ isOpen, onClose, onAdd }: Props) 
 
     return (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 w-[90%] max-w-lg shadow-xl">
+            <div className="bg-gray-800 rounded-xl p-6 w-[90%] max-w-lg shadow-xl">
                 <h3 className="text-xl font-semibold mb-4">Agregar servicio adicional</h3>
 
                 {loading ? (
@@ -30,7 +30,7 @@ export default function AddExtraServiceModal({ isOpen, onClose, onAdd }: Props) 
                                     onAdd(s);    // 🔥 AHORA ESTÁ PERFECTO
                                     onClose();
                                 }}
-                                className="w-full text-left border p-3 rounded-lg hover:bg-gray-100 transition flex flex-col"
+                                className="w-full text-left border p-3 rounded-lg hover:bg-gray-700 transition flex flex-col"
                             >
                                 <div className="flex justify-between">
                                     <span className="font-medium">{s.name}</span>
