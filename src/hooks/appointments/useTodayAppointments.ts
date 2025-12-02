@@ -4,30 +4,41 @@ import { useEffect, useRef, useState } from "react";
 import { getTodayAppointments } from "@/services/appointments/appointments.service";
 import type { Appointment } from "@/types/appointments";
 
+/**
+ * Hook to fetch today's appointments and expose a refetch function.
+ * - Keeps a "previous" ref to detect transitions to completed.
+ * - Exposes refetch so parent components can refresh on-demand.
+ */
 export const useTodayAppointments = () => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    // Keep previous snapshot to detect status transitions
     const previous = useRef<Appointment[]>([]);
     const [justCompleted, setJustCompleted] = useState<Appointment | null>(null);
 
-    useEffect(() => {
-        let mounted = true;
+    // ---------------------------------------------------
+    // Fetch function (exposed as refetch)
+    // ---------------------------------------------------
+    const fetchAppointments = async () => {
+        try {
+            setLoading(true);
 
-        const fetchData = async () => {
             const result = await getTodayAppointments();
-            if (!mounted) return;
 
-            // Detect completed transition
+            // Detect transition to "completed" using the correct property names
             result.forEach((appt) => {
                 const old = previous.current.find((p) => p.id === appt.id);
 
+                // NOTE: use the property name that exists on your Appointment type:
+                // "services_completed"
                 if (old && old.status !== "completed" && appt.status === "completed") {
-                    // Usar solo completed_services
+                    // Use only services_completed to build the justCompleted payload
                     setJustCompleted({
                         ...appt,
-                        services: appt.completed_services.map((s) => ({
+                        // Map services_completed -> services (normalized shape)
+                        services: (appt.services_completed ?? []).map((s) => ({
                             id: s.id,
                             name: s.service_name,
                             price: s.service_price,
@@ -41,16 +52,45 @@ export const useTodayAppointments = () => {
 
             previous.current = result;
             setAppointments(result);
+            setError(null);
+        } catch (err: any) {
+            setError(err?.message ?? "Error al obtener citas");
+        } finally {
             setLoading(false);
+        }
+    };
+
+    // ---------------------------------------------------
+    // Initial load + polling
+    // ---------------------------------------------------
+    useEffect(() => {
+        let mounted = true;
+
+        const load = async () => {
+            if (!mounted) return;
+            await fetchAppointments();
         };
 
-        fetchData();
-        const interval = setInterval(fetchData, 15000);
+        load();
+        const interval = setInterval(fetchAppointments, 15000);
+
         return () => {
             mounted = false;
             clearInterval(interval);
         };
     }, []);
 
-    return { appointments, loading, error, justCompleted, setJustCompleted };
+    // ---------------------------------------------------
+    // Expose state + refetch
+    // ---------------------------------------------------
+    return {
+        appointments,
+        loading,
+        error,
+        justCompleted,
+        setJustCompleted,
+
+        // Expose refetch so parent components can trigger an immediate reload
+        refetch: fetchAppointments
+    };
 };

@@ -9,19 +9,18 @@ import { completeAppointmentWithServices } from "@/app/api/appointments";
 import type { Appointment } from "@/types/appointments";
 import { Service } from "@/types/services";
 
-
 export default function AppointmentsPage() {
-    const { appointments, loading, error, justCompleted, setJustCompleted } = useTodayAppointments();
-
-
+    const { appointments, loading, justCompleted, setJustCompleted, refetch } =
+        useTodayAppointments();
 
     const [selected, setSelected] = useState<Appointment | null>(null);
     const [selectedServices, setSelectedServices] = useState<Service[]>([]);
     const [extraOpen, setExtraOpen] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    console.log(appointments);
-
+    const refreshAppointments = () => {
+        refetch();
+    };
 
     const openFor = (appt: Appointment) => {
         setSelected(appt);
@@ -33,7 +32,10 @@ export default function AppointmentsPage() {
     };
 
     const handleConfirm = async (servicesToConfirm: Service[]) => {
-        if (!selected) return;
+        if (!selected && !justCompleted) return;
+
+        const appt = selected || justCompleted;
+
         setSaving(true);
 
         const payload = servicesToConfirm.map((s) => ({
@@ -44,8 +46,8 @@ export default function AppointmentsPage() {
         }));
 
         const res = await completeAppointmentWithServices(
-            selected.id,
-            selected.employee_id ?? null,
+            appt?.id ?? "",
+            appt?.employee_id ?? null,
             payload
         );
 
@@ -53,7 +55,9 @@ export default function AppointmentsPage() {
 
         if (res.success) {
             setSelected(null);
+            setJustCompleted(null);
             setSelectedServices([]);
+            refreshAppointments();
         } else {
             console.error("No se pudo completar la cita", res.error);
         }
@@ -65,7 +69,7 @@ export default function AppointmentsPage() {
         <div className="p-8 space-y-6">
             <h1 className="text-3xl font-bold">Citas de Hoy</h1>
 
-            {appointments.length === 0 && <p className="text-gray-500">No hay citas hoy.</p>}
+            {appointments.length === 0 && <p className="text-gray-500">No hay citas hoy。</p>}
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {appointments.map((appt) => (
@@ -73,28 +77,25 @@ export default function AppointmentsPage() {
                 ))}
             </div>
 
-            {/* Modal de cita seleccionada */}
+            {/* 🔥 Modal único (no dos) */}
             <ConfirmationModal
-                appointment={selected}
-                onClose={() => setSelected(null)}
-                onConfirm={() => handleConfirm(selectedServices)}
+                appointment={selected || justCompleted}
+                selectedServices={selectedServices}   // ✅ NECESARIO
+                onClose={() => {
+                    setSelected(null);
+                    setJustCompleted(null);
+                    setSelectedServices([]);          // ← Limpia los extras al cerrar
+                    refreshAppointments();
+                }}
+                onConfirm={(services) => {
+                    handleConfirm(services);
+                }}
                 onAddExtraService={() => setExtraOpen(true)}
+                onServiceDeleted={refreshAppointments}
             />
 
-            {/* Modal de cita terminada automáticamente */}
-            {justCompleted && (
-                <ConfirmationModal
-                    appointment={justCompleted}
-                    onClose={() => setJustCompleted(null)}
-                    onConfirm={() => {
-                        handleConfirm(justCompleted.services);
-                        setJustCompleted(null);
-                    }}
-                    onAddExtraService={() => setExtraOpen(true)}
-                />
-            )}
 
-            {/* Modal de extra */}
+            {/* Modal de agregar extra */}
             <AddExtraServiceModal
                 isOpen={extraOpen}
                 onClose={() => setExtraOpen(false)}

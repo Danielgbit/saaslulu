@@ -49,5 +49,18 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
     return [];
   }
 
-  return data as Appointment[];
+  if (!data) return [];
+
+  // -------------------------------------------------------
+  // ✨ Normalizar para evitar undefined y forzar los tipos
+  // -------------------------------------------------------
+  return data.map((appt: any) => ({
+    ...appt,
+    services: Array.isArray(appt.services) ? appt.services : [],
+
+    // Muy importante: normalizar services_completed
+    services_completed: Array.isArray(appt.services_completed)
+      ? appt.services_completed
+      : [],
+  })) as Appointment[];
 };

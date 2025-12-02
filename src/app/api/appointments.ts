@@ -1,4 +1,4 @@
-// src/services/appointments.api.ts
+// src/app/api/appointments.ts
 import { supabaseClient } from "@/lib/supabaseClient";
 
 /**
