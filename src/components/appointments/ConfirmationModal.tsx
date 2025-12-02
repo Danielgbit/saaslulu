@@ -11,7 +11,7 @@ interface Props {
     onConfirm: (servicesToConfirm: Service[]) => void;
     onAddExtraService: () => void;
     selectedServices?: Service[];
-    onServiceDeleted?: () => void;   // ← AGREGA ESTA LÍNEA
+    onServiceDeleted?: () => void; // no usado aún, pero queda para expansión
 }
 
 export default function ConfirmationModal({
@@ -24,9 +24,9 @@ export default function ConfirmationModal({
 
     if (!appointment) return null;
 
-    // ----------------------------
+    // ---------------------------------
     // Local editable state
-    // ----------------------------
+    // ---------------------------------
     const [completedLocal, setCompletedLocal] = useState(
         appointment.services_completed ?? []
     );
@@ -36,7 +36,7 @@ export default function ConfirmationModal({
         setCompletedLocal(appointment.services_completed ?? []);
     }, [appointment.services_completed]);
 
-    // Convert DB completed services → Service[]
+    // Convert DB completed services -> Service[]
     const completedAsServices: Service[] = completedLocal.map((item) => ({
         id: item.id,
         name: item.service_name,
@@ -46,7 +46,7 @@ export default function ConfirmationModal({
         created_at: new Date().toISOString(),
     }));
 
-    // Merge DB completed + extra (local from parent)
+    // Merge DB completed + extra (local)
     const finalServices: Service[] = [...completedAsServices, ...selectedServices];
 
     // Total price
@@ -54,14 +54,13 @@ export default function ConfirmationModal({
         return finalServices.reduce((sum, s) => sum + (s.price ?? 0), 0);
     }, [finalServices]);
 
-    // ----------------------------
-    // Delete completed service (DB)
-    // ----------------------------
+    // ---------------------------------
+    // Delete completed service
+    // ---------------------------------
     const handleDelete = async (serviceId: string) => {
         const res = await deleteCompletedService(serviceId);
 
         if (res.success) {
-            // Update LOCAL state only → no blinking
             setCompletedLocal((prev) => prev.filter((s) => s.id !== serviceId));
         } else {
             alert("No se pudo eliminar el servicio.");
@@ -76,6 +75,7 @@ export default function ConfirmationModal({
                 <h2 className="text-2xl font-bold text-white text-center mb-1">
                     ¡Servicio finalizado!
                 </h2>
+
                 <p className="text-gray-400 text-sm text-center mb-4">
                     Detalles del servicio de{" "}
                     <span className="font-semibold text-gray-200">
@@ -88,8 +88,20 @@ export default function ConfirmationModal({
                         Servicios completados
                     </p>
 
+                    {/* ⬇️ NUEVO BLOQUE SOLICITADO */}
                     {finalServices.length === 0 ? (
-                        <p className="text-gray-500 text-sm">No hay servicios completados.</p>
+                        <div className="text-center py-4">
+                            <p className="text-gray-400 text-sm font-medium">
+                                Esta cita está completada pero no tiene servicios registrados.
+                            </p>
+
+                            <button
+                                onClick={onAddExtraService}
+                                className="mt-3 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition"
+                            >
+                                Agregar servicio
+                            </button>
+                        </div>
                     ) : (
                         <ul className="space-y-2">
                             {finalServices.map((s) => (
@@ -104,7 +116,7 @@ export default function ConfirmationModal({
                                         </span>
                                     </div>
 
-                                    {/* Only allow delete if it's NOT an extra service */}
+                                    {/* ocultar eliminar si el servicio es añadido (local) */}
                                     {!selectedServices.some(ss => ss.id === s.id) && (
                                         <button
                                             className="text-red-400 text-xs hover:text-red-300 hover:underline transition"
@@ -119,11 +131,13 @@ export default function ConfirmationModal({
                     )}
                 </div>
 
+                {/* Total */}
                 <div className="mt-4 bg-gray-900 border border-gray-700 rounded-xl p-4 flex justify-between items-center shadow-inner">
                     <span className="font-semibold text-gray-300 text-sm">Total a cobrar</span>
                     <span className="text-xl font-bold text-green-400">${total}</span>
                 </div>
 
+                {/* Botones */}
                 <div className="flex flex-col gap-3 mt-6">
 
                     <button
