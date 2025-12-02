@@ -11,6 +11,7 @@ interface Props {
     onConfirm: (servicesToConfirm: Service[]) => void;
     onAddExtraService: () => void;
     selectedServices?: Service[];
+    onServiceDeleted?: () => void;   // ← AGREGA ESTA LÍNEA
 }
 
 export default function ConfirmationModal({
