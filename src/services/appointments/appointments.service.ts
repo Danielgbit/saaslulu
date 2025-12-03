@@ -64,3 +64,17 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
       : [],
   })) as Appointment[];
 };
+
+export const getTomorrowAppointments = async () => {
+  const res = await fetch(`/api/appointments/tomorrow`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch appointments");
+  }
+
+  console.log(res.json());
+
+
+  return res.json();
+};
+
