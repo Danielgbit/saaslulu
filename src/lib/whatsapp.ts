@@ -1,21 +1,17 @@
-import { default as makeWASocket, useMultiFileAuthState } from "@whiskeysockets/baileys";
-import fs from "fs";
+import makeWASocket, { useMultiFileAuthState } from "@whiskeysockets/baileys";
 
-const sessionPath = "./baileys-auth.json";
+const sessionPath = "./baileys-session"; // carpeta donde se guardan las credenciales
 
-// Si no existe el archivo, crearlo vacío
-if (!fs.existsSync(sessionPath)) {
-    fs.writeFileSync(sessionPath, JSON.stringify({}));
-}
+export async function createWhatsAppClient() {
+    // Cargar credenciales (o generarlas si no existen)
+    const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
 
-const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
-
-export function createWhatsAppClient() {
     const sock = makeWASocket({
         auth: state,
-        printQRInTerminal: true
+        printQRInTerminal: true,
     });
 
+    // Actualizar credenciales cuando cambian
     sock.ev.on("creds.update", saveCreds);
 
     return sock;
