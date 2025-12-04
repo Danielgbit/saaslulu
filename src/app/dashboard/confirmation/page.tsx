@@ -1,153 +1,149 @@
-'use client'
+'use client';
 
-import { useState } from 'react';
+import { useTomorrowAppointments } from "@/hooks/appointments/useTomorrowAppointments";
+import { useStartConfirmation } from "@/hooks/appointments/useStartConfirmation";
+import LastConfirmationCard from "@/components/appointments/LastConfirmationCard";
 
 const ConfirmationPage = () => {
-    const [loading, setLoading] = useState(false);
-    const [result, setResult] = useState<any>(null);
-    const [error, setError] = useState<string | null>(null);
 
-    const handleSendConfirmations = async () => {
-        setLoading(true);
-        setError(null);
-        setResult(null);
+    const {
+        appointments,
+        count,
+        loading: loadingTomorrow,
+        error: errorTomorrow,
+        refetch
+    } = useTomorrowAppointments();
 
-        try {
-            const response = await fetch('/api/appointments/start-confirmation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+    const {
+        loading: loadingSend,
+        result: confirmationResult,
+        error: errorSend,
+        startConfirmation
+    } = useStartConfirmation();
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Error al enviar confirmaciones');
-            }
-
-            setResult(data);
-        } catch (err: any) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Función para ver las citas de mañana primero
-    const handleViewTomorrowAppointments = async () => {
-        try {
-            const response = await fetch('/api/appointments/start-confirmation', {
-                method: 'GET',
-            });
-
-            const data = await response.json();
-            setResult(data);
-        } catch (err: any) {
-            setError(err.message);
-        }
-    };
+    const isLoading = loadingTomorrow || loadingSend;
 
     return (
-        <div className="flex justify-center items-center flex-col h-screen p-4">
-            <h1 className="text-2xl font-bold mb-8">Envío de Confirmaciones</h1>
+        <div className="flex flex-col items-center min-h-screen p-6 bg-gray-100">
 
+            {/* Title */}
+            <h1 className="text-3xl font-bold text-gray-800 mb-10">
+                Envío de Confirmaciones
+            </h1>
+
+            {/* Actions */}
             <div className="flex gap-4 mb-8">
                 <button
-                    onClick={handleViewTomorrowAppointments}
-                    className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
-                    disabled={loading}
+                    onClick={refetch}
+                    disabled={isLoading}
+                    className={`px-5 py-3 rounded-lg font-semibold transition ${isLoading
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-gray-700 hover:bg-gray-800 text-white"
+                        }`}
                 >
-                    Ver Citas de Mañana
+                    {loadingTomorrow ? "Cargando..." : "Ver Citas de Mañana"}
                 </button>
 
                 <button
-                    onClick={handleSendConfirmations}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-                    disabled={loading}
+                    onClick={startConfirmation}
+                    disabled={isLoading}
+                    className={`px-5 py-3 rounded-lg font-semibold transition ${loadingSend
+                        ? "bg-blue-300 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                        }`}
                 >
-                    {loading ? 'Enviando...' : 'Enviar Confirmaciones'}
+                    {loadingSend ? "Enviando..." : "Enviar Confirmaciones"}
                 </button>
             </div>
 
-            {loading && (
-                <div className="mb-4">
-                    <p className="text-gray-600">Procesando citas...</p>
+            {/* Loading state */}
+            {isLoading && (
+                <p className="text-gray-600 mb-6 animate-pulse">Procesando…</p>
+            )}
+
+            {/* Error message */}
+            {(errorTomorrow || errorSend) && (
+                <div className="w-full max-w-2xl mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg">
+                    <p className="font-bold">Error</p>
+                    <p>{errorTomorrow || errorSend}</p>
                 </div>
             )}
 
-            {error && (
-                <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-                    <p className="font-bold">Error:</p>
-                    <p>{error}</p>
-                </div>
-            )}
+            {/* Container */}
+            <div className="w-full max-w-3xl space-y-8">
 
-            {result && (
-                <div className="mt-8 w-full max-w-2xl">
-                    <div className="bg-gray-800 p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-bold mb-4">Resultado:</h2>
+                {/* Tomorrow Appointments */}
+                {appointments.length > 0 && !loadingTomorrow && (
+                    <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                            Citas de Mañana
+                        </h2>
 
-                        {result.appointments ? (
-                            // Resultado de GET (ver citas)
-                            <div>
-                                <p className="mb-2">
-                                    <span className="font-semibold">Total de citas:</span> {result.count}
-                                </p>
-                                {result.appointments.length > 0 && (
-                                    <div className="mt-4">
-                                        <h3 className="font-bold mb-2">Citas:</h3>
-                                        <ul className="space-y-2">
-                                            {result.appointments.map((appointment: any) => (
-                                                <li key={appointment.id} className="p-3 bg-black rounded border">
-                                                    <p><strong>ID:</strong> {appointment.id}</p>
-                                                    <p><strong>Hora:</strong> {new Date(appointment.start_at).toLocaleString()}</p>
-                                                    <p><strong>Cliente:</strong> {appointment.client_name || 'Sin nombre'}</p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            // Resultado de POST (enviar confirmaciones)
-                            <div>
-                                <p className="mb-2">
-                                    <span className="font-semibold">Mensaje:</span> {result.message}
-                                </p>
-                                <p className="mb-2">
-                                    <span className="font-semibold">Total procesadas:</span> {result.total}
-                                </p>
-                                <p className="mb-2">
-                                    <span className="font-semibold">Exitosas:</span> {result.successful}
-                                </p>
-                                <p className="mb-4">
-                                    <span className="font-semibold">Fallidas:</span> {result.failed}
-                                </p>
+                        <p className="text-gray-700 mb-4">
+                            Total: <span className="font-bold">{count}</span>
+                        </p>
 
-                                {result.details && result.details.length > 0 && (
-                                    <div className="mt-4">
-                                        <h3 className="font-bold mb-2">Detalles por cita:</h3>
-                                        <ul className="space-y-2">
-                                            {result.details.map((detail: any, index: number) => (
-                                                <li
-                                                    key={index}
-                                                    className={`p-3 rounded border ${detail.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                                                        }`}
-                                                >
-                                                    <p><strong>Cita ID:</strong> {detail.appointment_id}</p>
-                                                    <p><strong>Estado:</strong> {detail.success ? '✅ Enviada' : '❌ Falló'}</p>
-                                                    {detail.error && <p><strong>Error:</strong> {detail.error}</p>}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
+                        <ul className="space-y-4">
+                            {appointments.map((appointment: any) => (
+                                <li
+                                    key={appointment.id}
+                                    className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
+                                >
+                                    <p><strong>Hora:</strong> {new Date(appointment.start_at).toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    })}</p>
+                                    <p><strong>Cliente:</strong> {appointment.client_name || "Sin nombre"}</p>
+                                    <p><strong>Empleado:</strong> {appointment.employee?.full_name || "Desconocido"}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {/* Confirmation Result */}
+                {confirmationResult && !loadingSend && (
+                    <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+                            Resultado de Envío
+                        </h2>
+
+                        <div className="space-y-2 text-gray-700">
+                            <p><strong>Mensaje:</strong> {confirmationResult.message}</p>
+                            <p><strong>Total:</strong> {confirmationResult.total}</p>
+                            <p><strong>Exitosas:</strong> {confirmationResult.successful}</p>
+                            <p><strong>Fallidas:</strong> {confirmationResult.failed}</p>
+                        </div>
+
+                        {/* Details */}
+                        {confirmationResult.details && (
+                            <ul className="mt-6 space-y-4">
+                                {confirmationResult.details.map((detail: any, index: number) => (
+                                    <li
+                                        key={index}
+                                        className={`p-4 rounded-lg border shadow-sm ${detail.success
+                                            ? "bg-green-50 border-green-200"
+                                            : "bg-red-50 border-red-200"
+                                            }`}
+                                    >
+                                        <p><strong>Cita ID:</strong> {detail.appointment_id}</p>
+                                        <p><strong>Estado:</strong> {detail.success ? "✅ Enviada" : "❌ Falló"}</p>
+                                        {detail.error && <p><strong>Error:</strong> {detail.error}</p>}
+                                    </li>
+                                ))}
+                            </ul>
                         )}
                     </div>
-                </div>
-            )}
+                )}
+
+                {/* Empty state (no citas and no loading) */}
+                {appointments.length === 0 && !loadingTomorrow && !confirmationResult && (
+                    <p className="text-gray-600 text-center">
+                        No hay datos para mostrar. Presiona un botón para comenzar.
+                    </p>
+                )}
+            </div>
+            <LastConfirmationCard />
         </div>
     );
 };

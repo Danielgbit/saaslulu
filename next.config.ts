@@ -8,6 +8,8 @@ const nextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ['4cb647b27df8.ngrok-free.app']
+
 };
 
 module.exports = nextConfig;

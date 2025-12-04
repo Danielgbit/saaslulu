@@ -65,6 +65,8 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
   })) as Appointment[];
 };
 
+
+// Service: fetches tomorrow's appointments
 export const getTomorrowAppointments = async () => {
   const res = await fetch(`/api/appointments/tomorrow`);
 
@@ -72,9 +74,41 @@ export const getTomorrowAppointments = async () => {
     throw new Error("Failed to fetch appointments");
   }
 
-  console.log(res.json());
+  return res.json();
+};
 
+
+// Service: initiates the confirmation process for tomorrow's appointments
+export const startConfirmationProcess = async () => {
+  const res = await fetch(`/api/appointments/start-confirmation`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Failed to confirm appointments: ${errText}`);
+  }
 
   return res.json();
 };
+
+
+/* Service: fetches confirmation responses */
+export const getConfirmationResponses = async () => {
+  const res = await fetch("/api/appointments/confirmation-response", {
+    method: "GET",
+    cache: "no-store"
+  });
+
+  if (!res.ok) {
+    throw new Error("Error al obtener mensajes de confirmación");
+  }
+
+  return res.json();
+};
+
+
 
