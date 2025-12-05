@@ -1,7 +1,12 @@
-'use client';
+"use client";
+
+import { useEffect, useState } from "react";
+import { Trash2 } from "lucide-react";
 
 import { useTomorrowAppointments } from "@/hooks/appointments/useTomorrowAppointments";
 import { useStartConfirmation } from "@/hooks/appointments/useStartConfirmation";
+
+import TomorrowAppointmentsCard from "@/components/appointments/TomorrowAppointmentsCard";
 import LastConfirmationCard from "@/components/appointments/LastConfirmationCard";
 
 const ConfirmationPage = () => {
@@ -21,47 +26,82 @@ const ConfirmationPage = () => {
         startConfirmation
     } = useStartConfirmation();
 
+    // Local state mirrors hook values to allow clearing
+    const [localAppointments, setLocalAppointments] = useState<any[]>([]);
+    const [localCount, setLocalCount] = useState(0);
+
+    /**
+     * Sync local state whenever hook appointments update.
+     */
+    useEffect(() => {
+        setLocalAppointments(appointments);
+        setLocalCount(count);
+    }, [appointments, count]);
+
     const isLoading = loadingTomorrow || loadingSend;
+
+    /**
+     * Clear tomorrow appointments manually.
+     */
+    const clearAppointments = () => {
+        setLocalAppointments([]);
+        setLocalCount(0);
+    };
 
     return (
         <div className="flex flex-col items-center min-h-screen p-6 bg-gray-100">
-
             {/* Title */}
             <h1 className="text-3xl font-bold text-gray-800 mb-10">
                 Envío de Confirmaciones
             </h1>
 
-            {/* Actions */}
+            {/* Action buttons */}
             <div className="flex gap-4 mb-8">
+
+                {/* Get tomorrow appointments */}
                 <button
                     onClick={refetch}
                     disabled={isLoading}
                     className={`px-5 py-3 rounded-lg font-semibold transition ${isLoading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-gray-700 hover:bg-gray-800 text-white"
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-gray-700 hover:bg-gray-800 text-white"
                         }`}
                 >
                     {loadingTomorrow ? "Cargando..." : "Ver Citas de Mañana"}
                 </button>
 
+                {/* Send confirmations */}
                 <button
                     onClick={startConfirmation}
                     disabled={isLoading}
                     className={`px-5 py-3 rounded-lg font-semibold transition ${loadingSend
-                        ? "bg-blue-300 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 text-white"
+                            ? "bg-blue-300 cursor-not-allowed"
+                            : "bg-blue-600 hover:bg-blue-700 text-white"
                         }`}
                 >
                     {loadingSend ? "Enviando..." : "Enviar Confirmaciones"}
                 </button>
+
+                {/* Clear appointments */}
+                <button
+                    onClick={clearAppointments}
+                    disabled={localAppointments.length === 0}
+                    className={`flex items-center gap-2 px-5 py-3 rounded-lg font-semibold transition ${localAppointments.length === 0
+                            ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                            : "bg-red-600 hover:bg-red-700 text-white"
+                        }`}
+                >
+                    <Trash2 size={18} />
+                    Limpiar
+                </button>
             </div>
 
-            {/* Loading state */}
+            {/* Loading status */}
             {isLoading && (
                 <p className="text-gray-600 mb-6 animate-pulse">Procesando…</p>
             )}
 
-            {/* Error message */}
+            {/* Error alerts */}
             {(errorTomorrow || errorSend) && (
                 <div className="w-full max-w-2xl mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg">
                     <p className="font-bold">Error</p>
@@ -69,39 +109,27 @@ const ConfirmationPage = () => {
                 </div>
             )}
 
-            {/* Container */}
+            {/* Main content */}
             <div className="w-full max-w-3xl space-y-8">
 
-                {/* Tomorrow Appointments */}
-                {appointments.length > 0 && !loadingTomorrow && (
-                    <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                            Citas de Mañana
-                        </h2>
-
-                        <p className="text-gray-700 mb-4">
-                            Total: <span className="font-bold">{count}</span>
-                        </p>
-
-                        <ul className="space-y-4">
-                            {appointments.map((appointment: any) => (
-                                <li
-                                    key={appointment.id}
-                                    className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
-                                >
-                                    <p><strong>Hora:</strong> {new Date(appointment.start_at).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}</p>
-                                    <p><strong>Cliente:</strong> {appointment.client_name || "Sin nombre"}</p>
-                                    <p><strong>Empleado:</strong> {appointment.employee?.full_name || "Desconocido"}</p>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                {/* Tomorrow appointments card */}
+                {!loadingTomorrow && localAppointments.length > 0 && (
+                    <TomorrowAppointmentsCard
+                        appointments={localAppointments}
+                        count={localCount}
+                    />
                 )}
 
-                {/* Confirmation Result */}
+                {/* Empty state */}
+                {!loadingTomorrow &&
+                    localAppointments.length === 0 &&
+                    !confirmationResult && (
+                        <p className="text-gray-600 text-center">
+                            No hay datos para mostrar. Presiona un botón para comenzar.
+                        </p>
+                    )}
+
+                {/* Confirmation results */}
                 {confirmationResult && !loadingSend && (
                     <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
                         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -115,34 +143,29 @@ const ConfirmationPage = () => {
                             <p><strong>Fallidas:</strong> {confirmationResult.failed}</p>
                         </div>
 
-                        {/* Details */}
                         {confirmationResult.details && (
                             <ul className="mt-6 space-y-4">
                                 {confirmationResult.details.map((detail: any, index: number) => (
                                     <li
                                         key={index}
                                         className={`p-4 rounded-lg border shadow-sm ${detail.success
-                                            ? "bg-green-50 border-green-200"
-                                            : "bg-red-50 border-red-200"
+                                                ? "bg-green-50 border-green-200"
+                                                : "bg-red-50 border-red-200"
                                             }`}
                                     >
                                         <p><strong>Cita ID:</strong> {detail.appointment_id}</p>
                                         <p><strong>Estado:</strong> {detail.success ? "✅ Enviada" : "❌ Falló"}</p>
-                                        {detail.error && <p><strong>Error:</strong> {detail.error}</p>}
+                                        {detail.error && (
+                                            <p><strong>Error:</strong> {detail.error}</p>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
                         )}
                     </div>
                 )}
-
-                {/* Empty state (no citas and no loading) */}
-                {appointments.length === 0 && !loadingTomorrow && !confirmationResult && (
-                    <p className="text-gray-600 text-center">
-                        No hay datos para mostrar. Presiona un botón para comenzar.
-                    </p>
-                )}
             </div>
+
             <LastConfirmationCard />
         </div>
     );

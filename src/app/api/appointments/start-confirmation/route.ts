@@ -4,6 +4,8 @@ import { supabaseClient } from "@/lib/supabaseClient";
 export async function POST(req: NextRequest) {
     try {
         const now = new Date();
+
+        // Calcular inicio y fin del día de mañana
         const tomorrowStart = new Date(now);
         tomorrowStart.setDate(now.getDate() + 1);
         tomorrowStart.setHours(0, 0, 0, 0);
@@ -12,6 +14,7 @@ export async function POST(req: NextRequest) {
         tomorrowEnd.setDate(now.getDate() + 1);
         tomorrowEnd.setHours(23, 59, 59, 999);
 
+        // Obtener citas del día siguiente
         const { data: appointments, error } = await supabaseClient
             .from("appointments")
             .select("*")
@@ -30,23 +33,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Solo enviar al webhook sin esperar su contenido
-        for (const appointment of appointments) {
-            fetch("https://centrodeesteticalulu.site/webhook-test/send-confirmation", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    appointment_id: appointment.id,
-                    start_at: appointment.start_at,
-                    client_phone: appointment.client_phone,
-                    client_name: appointment.client_name,
-                    key: Date.now() + "-" + appointment.id
-                }),
-                // No esperamos resultado
-            }).catch(err =>
-                console.error("Error enviando al webhook:", err)
-            );
-        }
+        // 🔥 Enviar TODAS las citas en un solo POST a tu webhook
+        await fetch("https://centrodeesteticalulu.site/webhook-test/send-confirmation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                total: appointments.length,
+                appointments,
+                key: Date.now()
+            })
+        }).catch(err => {
+            console.error("Error enviando citas al webhook:", err);
+        });
 
         return NextResponse.json({
             message: `Confirmaciones enviadas para ${appointments.length} citas`,
