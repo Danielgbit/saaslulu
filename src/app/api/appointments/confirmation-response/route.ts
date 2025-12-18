@@ -1,3 +1,4 @@
+//src/app/api/appointments/confirmation-response/route.ts
 /**
  * Webhook Receiver for Appointment Confirmation Messages
  * Parses incoming JSON strings for "message" and "client_phone"

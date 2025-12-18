@@ -1,3 +1,4 @@
+//src/app/api/appointments/start-confirmation/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseClient } from "@/lib/supabaseClient";
 
