@@ -1,6 +1,5 @@
-// app/api/confirmations/send/route.ts
 import { NextResponse } from "next/server";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { getTomorrowAppointments } from "@/services/appointments/appointments.service";
 import {
     buildMessage,
     groupByClient,
@@ -9,44 +8,19 @@ import {
 import { stylizeMessage } from "@/lib/ai/stylizeMessage";
 
 export async function POST() {
-    const now = new Date();
+    const { appointments } = await getTomorrowAppointments();
 
-    const tomorrowStart = new Date(now);
-    tomorrowStart.setDate(now.getDate() + 1);
-    tomorrowStart.setHours(0, 0, 0, 0);
-
-    const tomorrowEnd = new Date(now);
-    tomorrowEnd.setDate(now.getDate() + 1);
-    tomorrowEnd.setHours(23, 59, 59, 999);
-
-    const { data: appointments, error } = await supabaseClient
-        .from("appointments")
-        .select("*")
-        .gte("start_at", tomorrowStart.toISOString())
-        .lte("start_at", tomorrowEnd.toISOString())
-        .is("confirmed", null);
-
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    if (!appointments?.length) {
+    if (!appointments.length) {
         return NextResponse.json({ message: "No hay citas para mañana" });
     }
 
     const clients = groupByClient(appointments);
 
     for (const client of clients) {
-        const baseMessage = buildMessage(client);
-
-        // 🔥 IA SOLO AQUÍ
-        const finalMessage = await stylizeMessage(baseMessage);
-
-        await sendWhatsApp(client.client_phone, finalMessage);
+        const base = buildMessage(client);
+        const final = await stylizeMessage(base);
+        await sendWhatsApp(client.client_phone, final);
     }
 
-    return NextResponse.json({
-        ok: true,
-        sent: clients.length
-    });
+    return NextResponse.json({ ok: true, sent: clients.length });
 }

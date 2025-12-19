@@ -1,4 +1,4 @@
-import type { Service, CompletedService } from "./services";
+import type { Service, CompletedService } from "../services";
 
 export interface Appointment {
     id: string;

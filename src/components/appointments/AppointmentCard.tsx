@@ -1,6 +1,6 @@
 "use client";
 
-import type { Appointment } from "@/types/appointments";
+import type { Appointment } from "@/types/appointments/appointments";
 import StatusBadge from "./StatusBadge";
 
 type Props = {

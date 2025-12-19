@@ -6,7 +6,7 @@ import AppointmentCard from "@/components/appointments/AppointmentCard";
 import ConfirmationModal from "@/components/appointments/ConfirmationModal";
 import AddExtraServiceModal from "@/components/appointments/AddExtraServiceModal";
 import { completeAppointmentWithServices } from "@/app/api/appointments";
-import type { Appointment } from "@/types/appointments";
+import type { Appointment } from "@/types/appointments/appointments";
 import { Service } from "@/types/services";
 
 export default function AppointmentsPage() {

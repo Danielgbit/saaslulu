@@ -1,6 +1,6 @@
 "use client";
 
-import type { Appointment } from "@/types/appointments";
+import type { Appointment } from "@/types/appointments/appointments";
 import { Service } from "@/types/services";
 import { useMemo, useState, useEffect } from "react";
 import { deleteCompletedService } from "@/services/services/deleteCompleted.service";

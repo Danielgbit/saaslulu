@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { Trash2, CalendarCheck, Send } from "lucide-react";
 
-import { } from "@/hooks/appointments/useTomorrowAppointments";
+import { useTomorrowAppointments } from "@/hooks/appointments/useTomorrowAppointments";
 import { useStartConfirmation } from "@/hooks/appointments/useStartConfirmation";
 
 import TomorrowAppointmentsCard from "@/components/appointments/TomorrowAppointmentsCard";
 
 const ConfirmationPage = () => {
+
+    // 🔹 HOOK DE CITAS
     const {
         appointments,
         count,
@@ -17,6 +19,7 @@ const ConfirmationPage = () => {
         refetch
     } = useTomorrowAppointments();
 
+    // 🔹 HOOK DE ENVÍO
     const {
         loading: loadingSend,
         result: confirmationResult,

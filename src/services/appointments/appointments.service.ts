@@ -1,5 +1,5 @@
 import { supabaseClient } from "@/lib/supabaseClient";
-import type { Appointment } from "@/types/appointments";
+import type { Appointment } from "@/types/appointments/appointments";
 
 export const getTodayAppointments = async (): Promise<Appointment[]> => {
   const now = new Date();
@@ -66,36 +66,6 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
 };
 
 
-export const getTomorrowAppointments = async () => {
-  const now = new Date();
-
-  const tomorrowStart = new Date(now);
-  tomorrowStart.setDate(now.getDate() + 1);
-  tomorrowStart.setHours(0, 0, 0, 0);
-
-  const tomorrowEnd = new Date(now);
-  tomorrowEnd.setDate(now.getDate() + 1);
-  tomorrowEnd.setHours(23, 59, 59, 999);
-
-  const { data, error } = await supabaseClient
-    .from("appointments")
-    .select("*")
-    .gte("start_at", tomorrowStart.toISOString())
-    .lte("start_at", tomorrowEnd.toISOString())
-    .is("confirmed", null);
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return {
-    appointments: data ?? [],
-    count: data?.length ?? 0
-  };
-};
-
-
-
 // Service: initiates the confirmation process for tomorrow's appointments
 export const startConfirmationProcess = async () => {
   const res = await fetch(`/api/appointments/start-confirmation`, {
@@ -112,3 +82,31 @@ export const startConfirmationProcess = async () => {
 
   return res.json();
 };
+
+
+// Service: gets tomorrow's appointments
+export async function getTomorrowAppointments() {
+  const now = new Date();
+
+  const start = new Date(now);
+  start.setDate(now.getDate() + 1);
+  start.setHours(0, 0, 0, 0);
+
+  const end = new Date(now);
+  end.setDate(now.getDate() + 1);
+  end.setHours(23, 59, 59, 999);
+
+  const { data, error } = await supabaseClient
+    .from("appointments")
+    .select("*")
+    .gte("start_at", start.toISOString())
+    .lte("start_at", end.toISOString())
+    .eq("status", "scheduled"); // ✅ AQUÍ
+
+  if (error) throw new Error(error.message);
+
+  return {
+    appointments: data ?? [],
+    count: data?.length ?? 0
+  };
+}

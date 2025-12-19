@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { getTodayAppointments } from "@/services/appointments/appointments.service";
-import type { Appointment } from "@/types/appointments";
+import type { Appointment } from "@/types/appointments/appointments";
 
 /**
  * Hook to fetch today's appointments and expose a refetch function.
