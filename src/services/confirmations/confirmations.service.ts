@@ -36,16 +36,23 @@ export function buildMessage(client: any) {
 
     if (client.appointments.length === 1) {
         const a = client.appointments[0];
+
+        const serviceName =
+            a.service?.name || "Servicio programado";
+
         message += `Te recordamos tu próxima cita:\n\n`;
         message += `📅 ${formatDate(a.start_at)}\n`;
-        message += `💅 ${a.service_name}\n\n`;
+        message += `💅 ${serviceName}\n\n`;
         message += `Por favor confirma respondiendo “Sí”.`;
     } else {
         message += `Te recordamos tus próximas citas:\n\n`;
 
         for (const a of client.appointments) {
+            const serviceName =
+                a.service?.name || "Servicio programado";
+
             message += `📅 ${formatDate(a.start_at)}\n`;
-            message += `💅 ${a.service_name}\n\n`;
+            message += `💅 ${serviceName}\n\n`;
         }
 
         message += `Confirma respondiendo “Sí” si todo está bien.`;
@@ -54,16 +61,25 @@ export function buildMessage(client: any) {
     return message;
 }
 
+
 export async function sendWhatsApp(phone: string, message: string) {
-    await fetch(process.env.WHATSAPP_API_URL!, {
+    // 🔥 CONVERTIR A JID
+    const jid = `${phone}@s.whatsapp.net`;
+
+    const res = await fetch(process.env.WHATSAPP_API_URL!, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${process.env.WHATSAPP_API_KEY}`,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            phone,
-            message
+            jid,        // 👈 CLAVE
+            message: String(message) // 👈 BLINDA
         })
     });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || "Baileys send failed");
+    }
 }

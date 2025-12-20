@@ -83,7 +83,7 @@ export const startConfirmationProcess = async () => {
 
 
 
-// Service: gets tomorrow's appointments (with employee name)
+// Service: gets tomorrow's appointments (with employee + service name)
 export async function getTomorrowAppointments() {
   const now = new Date();
 
@@ -103,6 +103,10 @@ export async function getTomorrowAppointments() {
       employee:employee_id (
         id,
         full_name
+      ),
+      service:service_id (
+        id,
+        name
       )
     `)
     .gte("start_at", start.toISOString())
@@ -116,4 +120,3 @@ export async function getTomorrowAppointments() {
     count: data?.length ?? 0
   };
 }
-
