@@ -19,9 +19,6 @@ export function useTomorrowAppointments() {
 
             const res = await fetch("/api/appointments/tomorrow");
 
-            console.log(res);
-
-
             if (!res.ok) {
                 const body = await res.json();
                 throw new Error(body?.error || "Error fetching appointments");

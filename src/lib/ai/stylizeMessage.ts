@@ -1,3 +1,7 @@
+
+// src/lib/ai/stylizeMessage.ts
+// Service: stylizes a message for WhatsApp
+
 export async function stylizeMessage(text: string) {
     try {
         const res = await fetch(

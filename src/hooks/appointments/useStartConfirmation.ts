@@ -12,6 +12,8 @@ export const useStartConfirmation = () => {
             setError(null);
 
             const data = await startConfirmationProcess();
+            console.log("🚀 ~ useStartConfirmation ~ data:", data);
+
             setResult(data);
 
             return data;

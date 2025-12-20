@@ -1,3 +1,6 @@
+// src/services/confirmations/confirmations.service.ts
+// Service: sends confirmation messages to clients
+
 export function groupByClient(appointments: any[]) {
     const grouped: Record<string, any> = {};
 

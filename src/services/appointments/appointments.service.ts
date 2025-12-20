@@ -68,24 +68,22 @@ export const getTodayAppointments = async (): Promise<Appointment[]> => {
 
 // Service: initiates the confirmation process for tomorrow's appointments
 export const startConfirmationProcess = async () => {
-  const res = await fetch(`/api/appointments/start-confirmation`, {
+  const res = await fetch(`/api/confirmations/send`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" }
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`Failed to confirm appointments: ${errText}`);
+    throw new Error(errText);
   }
 
   return res.json();
 };
 
 
-// Service: gets tomorrow's appointments
-// Service: gets tomorrow's appointments
+
+// Service: gets tomorrow's appointments (with employee name)
 export async function getTomorrowAppointments() {
   const now = new Date();
 
@@ -100,10 +98,16 @@ export async function getTomorrowAppointments() {
 
   const { data, error } = await supabaseClient
     .from("appointments")
-    .select("*")
+    .select(`
+      *,
+      employee:employee_id (
+        id,
+        full_name
+      )
+    `)
     .gte("start_at", start.toISOString())
     .lte("start_at", end.toISOString())
-    .in("status", ["scheduled", "confirmed"]); // ✅ FIX
+    .in("status", ["scheduled", "confirmed"]);
 
   if (error) throw new Error(error.message);
 
@@ -112,3 +116,4 @@ export async function getTomorrowAppointments() {
     count: data?.length ?? 0
   };
 }
+
