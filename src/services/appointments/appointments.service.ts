@@ -85,15 +85,17 @@ export const startConfirmationProcess = async () => {
 
 
 // Service: gets tomorrow's appointments
+// Service: gets tomorrow's appointments
 export async function getTomorrowAppointments() {
   const now = new Date();
 
+  // Start of tomorrow (00:00)
   const start = new Date(now);
   start.setDate(now.getDate() + 1);
   start.setHours(0, 0, 0, 0);
 
-  const end = new Date(now);
-  end.setDate(now.getDate() + 1);
+  // End of tomorrow (23:59:59.999)
+  const end = new Date(start);
   end.setHours(23, 59, 59, 999);
 
   const { data, error } = await supabaseClient
@@ -101,7 +103,7 @@ export async function getTomorrowAppointments() {
     .select("*")
     .gte("start_at", start.toISOString())
     .lte("start_at", end.toISOString())
-    .eq("status", "scheduled"); // ✅ AQUÍ
+    .in("status", ["scheduled", "confirmed"]); // ✅ FIX
 
   if (error) throw new Error(error.message);
 
