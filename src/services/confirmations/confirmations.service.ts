@@ -62,24 +62,25 @@ export function buildMessage(client: any) {
 }
 
 
-export async function sendWhatsApp(phone: string, message: string) {
-    // 🔥 CONVERTIR A JID
-    const jid = `${phone}@s.whatsapp.net`;
 
-    const res = await fetch(process.env.WHATSAPP_API_URL!, {
+// src/services/whatsapp/whatsapp.service.ts (SERVER)
+export async function sendWhatsApp(phone: string, message: string) {
+    const res = await fetch(`${process.env.BAILEYS_API_URL}/send`, {
         method: "POST",
         headers: {
-            "Authorization": `Bearer ${process.env.WHATSAPP_API_KEY}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.BAILEYS_API_KEY}`
         },
         body: JSON.stringify({
-            jid,        // 👈 CLAVE
-            message: String(message) // 👈 BLINDA
-        })
+            phone,
+            message
+        }),
+        cache: "no-store"
     });
 
     if (!res.ok) {
         const err = await res.text();
         throw new Error(err || "Baileys send failed");
     }
+
 }

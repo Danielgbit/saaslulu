@@ -62,13 +62,13 @@ export async function POST() {
                 await sendWhatsApp(client.client_phone, final);
                 sent++;
             } catch (err: any) {
-                console.error(
-                    "❌ Error enviando confirmación",
-                    client.client_phone,
-                    err.message
-                );
+                console.error("❌ WhatsApp send error", {
+                    phone: client.client_phone,
+                    error: err.message
+                });
                 failed.push(client.client_phone);
             }
+
         }
 
         // 5️⃣ Respuesta final clara
