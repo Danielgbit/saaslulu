@@ -1,33 +1,37 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
-import QRCode from 'qrcode'
-import { getWhatsAppQR, logoutWhatsApp } from '@/services/whatsapp/whatsapp.service'
+import { useEffect, useState } from "react";
+import QRCode from "qrcode";
 
 export function useWhatsApp() {
-    const [qr, setQr] = useState<string | null>(null)
-    const [connected, setConnected] = useState(false)
+    const [qr, setQr] = useState<string | null>(null);
+    const [connected, setConnected] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(async () => {
-            const data = await getWhatsAppQR()
+            const res = await fetch("/api/whatsapp/qr");
+            if (!res.ok) return;
+
+            const data = await res.json();
 
             if (data.qr) {
-                const img = await QRCode.toDataURL(data.qr)
-                setQr(img)
-                setConnected(false)
+                const img = await QRCode.toDataURL(data.qr);
+                setQr(img);
+                setConnected(false);
             } else {
-                setQr(null)
-                setConnected(true)
+                setQr(null);
+                setConnected(true);
             }
-        }, 2000)
+        }, 2000);
 
-        return () => clearInterval(interval)
-    }, [])
+        return () => clearInterval(interval);
+    }, []);
 
     return {
         qr,
         connected,
-        logout: logoutWhatsApp
-    }
+        logout: async () => {
+            await fetch("/api/whatsapp/logout", { method: "POST" });
+        }
+    };
 }
