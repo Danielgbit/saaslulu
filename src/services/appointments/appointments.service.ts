@@ -87,14 +87,21 @@ export const startConfirmationProcess = async () => {
 export async function getTomorrowAppointments() {
   const now = new Date();
 
-  // Start of tomorrow (00:00)
-  const start = new Date(now);
-  start.setDate(now.getDate() + 1);
-  start.setHours(0, 0, 0, 0);
+  // mañana en UTC (00:00)
+  const start = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+    0, 0, 0, 0
+  ));
 
-  // End of tomorrow (23:59:59.999)
-  const end = new Date(start);
-  end.setHours(23, 59, 59, 999);
+  // mañana en UTC (23:59:59.999)
+  const end = new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+    23, 59, 59, 999
+  ));
 
   const { data, error } = await supabaseClient
     .from("appointments")
