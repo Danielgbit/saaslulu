@@ -83,7 +83,7 @@ export const startConfirmationProcess = async () => {
 
 
 
-// Service: gets tomorrow's appointments (with employee + service name)
+// Service: gets tomorrow's appointments (pending confirmation only)
 export async function getTomorrowAppointments() {
   const now = new Date();
 
@@ -118,7 +118,7 @@ export async function getTomorrowAppointments() {
     `)
     .gte("start_at", start.toISOString())
     .lte("start_at", end.toISOString())
-    .in("status", ["scheduled", "confirmed"]);
+    .eq("status", "scheduled"); // 🔥 SOLO PENDIENTES
 
   if (error) throw new Error(error.message);
 

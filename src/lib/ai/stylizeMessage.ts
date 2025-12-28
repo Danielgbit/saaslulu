@@ -1,50 +1,51 @@
 
 // src/lib/ai/stylizeMessage.ts
 // Service: stylizes a message for WhatsApp
-
 export async function stylizeMessage(text: string) {
-    try {
-        const res = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Goog-Api-Key": process.env.GEMINI_API_KEY!,
-                },
-                body: JSON.stringify({
-                    contents: [
-                        {
-                            role: "user",
-                            parts: [{ text }]
-                        }
-                    ],
-                    systemInstruction: {
-                        parts: [{
-                            text: `
-Reescribe el siguiente mensaje de WhatsApp para que suene
-más cálido y humano.
+    const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${process.env.GEMINI_MODEL}:generateContent`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": process.env.GEMINI_API_KEY!,
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            {
+                                text: `
+CAMBIA OBLIGATORIAMENTE la frase
+"Te recordamos tu próxima cita"
+por
+"Queremos recordarte con gusto tu próxima cita".
 
-Reglas:
-- No cambies datos, fechas ni servicios
-- No agregues información
-- Mantén el formato y emojis
-- Devuelve solo el texto
-              `.trim()
-                        }]
+NO hagas ningún otro cambio.
+Devuelve SOLO el texto final.
+
+MENSAJE:
+${text}
+`.trim()
+                            }
+                        ]
                     }
-                })
-            }
-        );
+                ],
+                generationConfig: {
+                    temperature: 0.9,
+                    maxOutputTokens: 512
+                }
+            })
+        }
+    );
 
-        const data = await res.json();
+    const data = await res.json();
 
+    console.log("🔍 GEMINI RAW RESPONSE:", JSON.stringify(data, null, 2));
 
-        return (
-            data?.candidates?.[0]?.content?.parts?.[0]?.text || text
-        );
-    } catch {
-        // fallback total
-        return text;
-    }
+    const output =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    return output || text;
 }

@@ -32,7 +32,7 @@ function formatDate(dateStr: string) {
 }
 
 export function buildMessage(client: any) {
-    let message = `Hola ${client.client_name} 😊\n\n`;
+    let message = `Hola ${client.client_name} \n\n`;
 
     if (client.appointments.length === 1) {
         const a = client.appointments[0];
@@ -41,8 +41,8 @@ export function buildMessage(client: any) {
             a.service?.name || "Servicio programado";
 
         message += `Te recordamos tu próxima cita:\n\n`;
-        message += `📅 ${formatDate(a.start_at)}\n`;
-        message += `💅 ${serviceName}\n\n`;
+        message += `${formatDate(a.start_at)}\n`;
+        message += `${serviceName}\n\n`;
         message += `Por favor confirma respondiendo “Sí”.`;
     } else {
         message += `Te recordamos tus próximas citas:\n\n`;
@@ -51,8 +51,8 @@ export function buildMessage(client: any) {
             const serviceName =
                 a.service?.name || "Servicio programado";
 
-            message += `📅 ${formatDate(a.start_at)}\n`;
-            message += `💅 ${serviceName}\n\n`;
+            message += `${formatDate(a.start_at)}\n`;
+            message += `${serviceName}\n\n`;
         }
 
         message += `Confirma respondiendo “Sí” si todo está bien.`;
