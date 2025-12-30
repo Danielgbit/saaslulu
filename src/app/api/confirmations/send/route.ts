@@ -10,6 +10,7 @@ import {
 } from "@/services/confirmations/confirmations.service";
 import { stylizeMessage } from "@/lib/ai/stylizeMessage";
 import { isWhatsAppConnected } from "@/services/whatsapp/whatsapp.service";
+import { createConfirmationToken } from "@/services/confirmations/confirmationToken.service";
 
 export async function POST() {
     try {
@@ -40,17 +41,21 @@ export async function POST() {
         const failed: string[] = [];
 
         // 4️⃣ Enviar mensajes (tolerante a errores)
+
         for (const client of clients) {
             try {
-                const base = buildMessage(client);
+                // 👉 tomamos la cita (una por mensaje)
+                const appointment = client.appointments[0];
+
+                // 🔐 generamos token único para esa cita
+                const token = await createConfirmationToken(appointment.id);
+
+                const confirmationUrl =
+                    `${process.env.APP_URL}/confirmar?token=${token}`;
+
+                const base = buildMessage(client, confirmationUrl);
                 const final = await stylizeMessage(base);
 
-                console.log('final', final);
-                console.log('client', client);
-                console.log('client.client_phone', client.client_phone);
-
-
-                // 🛡️ DEFENSA OBLIGATORIA
                 if (
                     typeof final !== "string" ||
                     final.trim().length === 0 ||
@@ -68,8 +73,8 @@ export async function POST() {
                 });
                 failed.push(client.client_phone);
             }
-
         }
+
 
         // 5️⃣ Respuesta final clara
         return NextResponse.json({

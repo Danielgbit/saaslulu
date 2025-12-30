@@ -1,6 +1,7 @@
 // src/services/confirmations/confirmations.service.ts
 // Service: sends confirmation messages to clients
 
+
 export function groupByClient(appointments: any[]) {
     const grouped: Record<string, any> = {};
 
@@ -31,7 +32,7 @@ function formatDate(dateStr: string) {
     });
 }
 
-export function buildMessage(client: any) {
+export function buildMessage(client: any, confirmationUrl: string) {
     let message = `Hola ${client.client_name} \n\n`;
 
     if (client.appointments.length === 1) {
@@ -53,6 +54,7 @@ export function buildMessage(client: any) {
 
             message += `${formatDate(a.start_at)}\n`;
             message += `${serviceName}\n\n`;
+            message += `👉 Confirma tu cita aquí:\n${confirmationUrl}`;
         }
 
         message += `Confirma respondiendo “Sí” si todo está bien.`;
