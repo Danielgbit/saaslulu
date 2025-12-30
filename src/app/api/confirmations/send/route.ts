@@ -10,7 +10,7 @@ import {
 } from "@/services/confirmations/confirmations.service";
 import { stylizeMessage } from "@/lib/ai/stylizeMessage";
 import { isWhatsAppConnected } from "@/services/whatsapp/whatsapp.service";
-import { createConfirmationToken } from "@/services/confirmations/confirmationToken.service";
+import { getOrCreateConfirmationToken } from "@/services/confirmations/confirmationToken.service";
 
 export async function POST() {
     try {
@@ -40,41 +40,63 @@ export async function POST() {
         let sent = 0;
         const failed: string[] = [];
 
-        // 4️⃣ Enviar mensajes (tolerante a errores)
-
+        // 4️⃣ Enviar mensajes (tolerante a errores por cliente)
         for (const client of clients) {
             try {
-                // 👉 tomamos la cita (una por mensaje)
+                // 👉 Tomamos una cita por cliente (regla actual)
                 const appointment = client.appointments[0];
 
-                // 🔐 generamos token único para esa cita
-                const token = await createConfirmationToken(appointment.id);
+                // 🛡️ SOLO citas pendientes de confirmar
+                if (appointment.status !== "scheduled") {
+                    console.log(
+                        "⏭️ Skipping appointment (status != scheduled)",
+                        appointment.id,
+                        appointment.status
+                    );
+                    continue;
+                }
+
+                // 🔐 Obtener o crear token (idempotente)
+                const token = await getOrCreateConfirmationToken(
+                    appointment.id
+                );
 
                 const confirmationUrl =
                     `${process.env.APP_URL}/confirmar?token=${token}`;
 
-                const base = buildMessage(client, confirmationUrl);
-                const final = await stylizeMessage(base);
+                // 📝 Construir mensaje
+                const baseMessage = buildMessage(
+                    client,
+                    confirmationUrl
+                );
 
+                const finalMessage = await stylizeMessage(baseMessage);
+
+                // 🛡️ Defensa final
                 if (
-                    typeof final !== "string" ||
-                    final.trim().length === 0 ||
-                    final.includes("undefined")
+                    typeof finalMessage !== "string" ||
+                    finalMessage.trim().length === 0 ||
+                    finalMessage.includes("undefined")
                 ) {
                     throw new Error("Mensaje inválido generado");
                 }
 
-                await sendWhatsApp(client.client_phone, final);
+                // 📤 Enviar WhatsApp
+                await sendWhatsApp(
+                    client.client_phone,
+                    finalMessage
+                );
+
                 sent++;
             } catch (err: any) {
                 console.error("❌ WhatsApp send error", {
                     phone: client.client_phone,
                     error: err.message
                 });
+
                 failed.push(client.client_phone);
             }
         }
-
 
         // 5️⃣ Respuesta final clara
         return NextResponse.json({
@@ -85,7 +107,10 @@ export async function POST() {
         });
 
     } catch (err: any) {
-        console.error("❌ Error general en confirmations/send", err);
+        console.error(
+            "❌ Error general en confirmations/send",
+            err
+        );
 
         return NextResponse.json(
             { error: "Error interno enviando confirmaciones" },

@@ -33,31 +33,27 @@ function formatDate(dateStr: string) {
 }
 
 export function buildMessage(client: any, confirmationUrl: string) {
-    let message = `Hola ${client.client_name} \n\n`;
+    let message = `Hola ${client.client_name} 😊\n\n`;
 
     if (client.appointments.length === 1) {
         const a = client.appointments[0];
-
-        const serviceName =
-            a.service?.name || "Servicio programado";
+        const serviceName = a.service?.name || "Servicio programado";
 
         message += `Te recordamos tu próxima cita:\n\n`;
-        message += `${formatDate(a.start_at)}\n`;
-        message += `${serviceName}\n\n`;
-        message += `Por favor confirma respondiendo “Sí”.`;
+        message += `📅 ${formatDate(a.start_at)}\n`;
+        message += `💅 ${serviceName}\n\n`;
+        message += `👉 Confirma tu cita aquí:\n${confirmationUrl}\n\n`;
+        message += `¡Te esperamos!`;
     } else {
         message += `Te recordamos tus próximas citas:\n\n`;
 
         for (const a of client.appointments) {
-            const serviceName =
-                a.service?.name || "Servicio programado";
-
-            message += `${formatDate(a.start_at)}\n`;
-            message += `${serviceName}\n\n`;
-            message += `👉 Confirma tu cita aquí:\n${confirmationUrl}`;
+            const serviceName = a.service?.name || "Servicio programado";
+            message += `📅 ${formatDate(a.start_at)}\n`;
+            message += `💅 ${serviceName}\n\n`;
         }
 
-        message += `Confirma respondiendo “Sí” si todo está bien.`;
+        message += `👉 Confirma tus citas aquí:\n${confirmationUrl}`;
     }
 
     return message;
