@@ -1,22 +1,24 @@
-
 // src/lib/ai/stylizeMessage.ts
-// Service: stylizes a message for WhatsApp
+// Service: stylizes a message for WhatsApp (Groq)
+
+import Groq from "groq-sdk";
+
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY!,
+});
+
 export async function stylizeMessage(text: string) {
-    const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${process.env.GEMINI_MODEL}:generateContent`,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Goog-Api-Key": process.env.GEMINI_API_KEY!,
+    const completion = await groq.chat.completions.create({
+        model: process.env.GROQ_MODEL || "llama3-8b-8192",
+        messages: [
+            {
+                role: "system",
+                content:
+                    "Sigue las instrucciones EXACTAMENTE. No agregues texto adicional."
             },
-            body: JSON.stringify({
-                contents: [
-                    {
-                        role: "user",
-                        parts: [
-                            {
-                                text: `
+            {
+                role: "user",
+                content: `
 CAMBIA OBLIGATORIAMENTE la frase
 "Te recordamos tu próxima cita"
 por
@@ -28,24 +30,13 @@ Devuelve SOLO el texto final.
 MENSAJE:
 ${text}
 `.trim()
-                            }
-                        ]
-                    }
-                ],
-                generationConfig: {
-                    temperature: 0.9,
-                    maxOutputTokens: 512
-                }
-            })
-        }
-    );
+            }
+        ],
+        temperature: 0.9,
+        max_tokens: 512,
+    });
 
-    const data = await res.json();
-
-    console.log("🔍 GEMINI RAW RESPONSE:", JSON.stringify(data, null, 2));
-
-    const output =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const output = completion.choices?.[0]?.message?.content;
 
     return output || text;
 }
