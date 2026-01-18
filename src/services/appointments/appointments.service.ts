@@ -161,3 +161,60 @@ export async function fetchEmployeeAppointments(
     },
   }))
 }
+
+/* =========================
+   GET
+========================= */
+export async function getAppointments(params: {
+  employeeId: string
+  start?: string
+  end?: string
+}) {
+  const query = new URLSearchParams(params as any).toString()
+
+  const res = await fetch(`/api/appointments?${query}`)
+  if (!res.ok) throw new Error("Error fetching appointments")
+
+  return res.json()
+}
+
+
+/* =========================
+   CREATE
+========================= */
+export async function createAppointment(data: any) {
+  const res = await fetch("/api/appointments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) throw new Error("Error creating appointment")
+  return res.json()
+}
+
+/* =========================
+   UPDATE
+========================= */
+export async function updateAppointment(data: any) {
+  const res = await fetch("/api/appointments", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  })
+
+  if (!res.ok) throw new Error("Error updating appointment")
+  return res.json()
+}
+
+/* =========================
+   DELETE
+========================= */
+export async function deleteAppointment(id: string) {
+  const res = await fetch(`/api/appointments?id=${id}`, {
+    method: "DELETE",
+  })
+
+  if (!res.ok) throw new Error("Error deleting appointment")
+  return res.json()
+}
