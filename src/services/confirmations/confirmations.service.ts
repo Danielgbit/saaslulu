@@ -35,17 +35,27 @@ function formatDate(dateStr: string) {
 export function buildMessage(client: any, confirmationUrl: string) {
     let message = `Hola ${client.client_name} 😊\n\n`;
 
+    // 👉 Regla actual: una cita por cliente
     if (client.appointments.length === 1) {
         const a = client.appointments[0];
         const serviceName = a.service?.name || "Servicio programado";
 
-        message += `Te recordamos tu próxima cita:\n\n`;
+        message += `Queremos recordarte con gusto tu próxima cita:\n\n`;
         message += `📅 ${formatDate(a.start_at)}\n`;
         message += `💅 ${serviceName}\n\n`;
-        message += `👉 Confirma tu cita aquí:\n${confirmationUrl}\n\n`;
-        message += `¡Te esperamos!`;
+
+        message += `¿Qué deseas hacer?\n\n`;
+        message += `✅ Confirmar cita\n`;
+        message += `🔁 Reprogramar\n`;
+        message += `❌ Cancelar\n\n`;
+
+        // ⚠️ Link SOLO en su línea (WhatsApp friendly)
+        message += `Confirma aquí 👇\n`;
+        message += `${confirmationUrl}\n\n`;
+
+        message += `Si deseas reprogramar o cancelar, respóndenos este mensaje por WhatsApp 📲`;
     } else {
-        message += `Te recordamos tus próximas citas:\n\n`;
+        message += `Queremos recordarte con gusto tus próximas citas:\n\n`;
 
         for (const a of client.appointments) {
             const serviceName = a.service?.name || "Servicio programado";
@@ -53,11 +63,21 @@ export function buildMessage(client: any, confirmationUrl: string) {
             message += `💅 ${serviceName}\n\n`;
         }
 
-        message += `👉 Confirma tus citas aquí:\n${confirmationUrl}`;
+        message += `¿Qué deseas hacer?\n\n`;
+        message += `✅ Confirmar citas\n`;
+        message += `🔁 Reprogramar\n`;
+        message += `❌ Cancelar\n\n`;
+
+        // ⚠️ Link SOLO en su línea
+        message += `Confirma aquí 👇\n`;
+        message += `${confirmationUrl}\n\n`;
+
+        message += `Si deseas reprogramar o cancelar, respóndenos este mensaje por WhatsApp 📲`;
     }
 
     return message;
 }
+
 
 
 

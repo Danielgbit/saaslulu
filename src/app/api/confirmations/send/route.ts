@@ -75,11 +75,11 @@ export async function POST() {
                 // 🛡️ Defensa final
                 if (
                     typeof finalMessage !== "string" ||
-                    finalMessage.trim().length === 0 ||
-                    finalMessage.includes("undefined")
+                    finalMessage.trim().length === 0
                 ) {
                     throw new Error("Mensaje inválido generado");
                 }
+
 
                 // 📤 Enviar WhatsApp
                 await sendWhatsApp(

@@ -24,3 +24,31 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+
+/* ============================= */
+/* FullCalendar custom styles   */
+/* ============================= */
+
+.fc .fc-col-header {
+  background-color: #020617;
+  border-bottom: 1px solid #fbfbfb;
+}
+
+.fc .fc-col-header-cell {
+  background-color: transparent;
+  border-color: #1f2933;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 8px 0;
+}
+
+.fc .fc-day-today .fc-col-header-cell-cushion {
+  color: #ff0000;
+}

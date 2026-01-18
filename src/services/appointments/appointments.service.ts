@@ -1,4 +1,4 @@
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 import type { Appointment } from "@/types/appointments/appointments";
 
 export const getTodayAppointments = async (): Promise<Appointment[]> => {
@@ -126,4 +126,38 @@ export async function getTomorrowAppointments() {
     appointments: data ?? [],
     count: data?.length ?? 0
   };
+}
+
+
+// Service: fetches appointments for a specific employee
+export async function fetchEmployeeAppointments(
+  employeeId: string,
+  start: string,
+  end: string
+) {
+  const res = await fetch(
+    `/api/appointments?employeeId=${employeeId}&start=${start}&end=${end}`
+  )
+
+  if (!res.ok) {
+    const error = await res.text()
+    console.error("API error:", error)
+    throw new Error("Error fetching appointments")
+  }
+
+  const data = await res.json()
+
+  return data.map((a: any) => ({
+    id: a.id,
+    title: a.client_name,
+    start: a.start_at,
+    end: a.end_at,
+    backgroundColor:
+      a.status === "cancelled" ? "#ef4444" : "#22c55e",
+    extendedProps: {
+      serviceName: a.services?.name ?? "Servicio",
+      status: a.status,
+      employeeId: a.employee_id,
+    },
+  }))
 }

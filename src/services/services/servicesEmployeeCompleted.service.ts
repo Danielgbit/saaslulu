@@ -5,7 +5,7 @@
  * This isolates DB logic from UI and hooks.
  */
 
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 
 // -----------------------------
 // Types

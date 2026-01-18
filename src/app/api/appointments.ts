@@ -1,5 +1,5 @@
 // src/app/api/appointments.ts
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 
 /**
  * Guarda en services_completed todos los servicios pasados (incluyendo el base)

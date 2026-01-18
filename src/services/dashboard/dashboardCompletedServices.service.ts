@@ -2,7 +2,7 @@
  * Dashboard service — fetch completed services for employee
  */
 
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 
 export async function getEmployeeCompletedServices(employeeId: string) {
     const { data, error } = await supabaseClient

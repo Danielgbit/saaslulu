@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { DateTime } from "luxon";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 import { calculateAvailability } from "@/services/employees/availability.service";
 
 const TIMEZONE = "America/Bogota";

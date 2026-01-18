@@ -1,6 +1,6 @@
 // src/app/api/delete-service/route.ts
 import { NextResponse } from "next/server";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 
 /**
  * DELETE a completed service by ID.

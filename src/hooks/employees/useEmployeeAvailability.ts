@@ -1,7 +1,7 @@
 // src/hooks/useAvailability.ts
 
 import { useEffect, useState, useCallback } from "react";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 import { EmployeeAvailability } from "@/types/employeeAvailability";
 
 export function useAvailability() {

@@ -1,3 +1,5 @@
+// src/app/confirmar/page.tsx
+
 "use client";
 
 import { useEffect } from "react";

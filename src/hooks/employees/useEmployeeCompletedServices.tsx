@@ -2,7 +2,7 @@
 // Fetches all completed services for a given employee
 
 import { useEffect, useState } from "react";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 
 export function useEmployeeCompletedServices(employeeId?: string) {
     const [services, setServices] = useState<any[]>([]);

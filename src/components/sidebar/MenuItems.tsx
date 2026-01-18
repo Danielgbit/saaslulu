@@ -1,5 +1,5 @@
 // src/components/sidebar/menuItems.ts
-import { Home, FileText, Bell, Settings, Crosshair, Check, Droplet, ChartArea } from "lucide-react";
+import { Home, FileText, Bell, Settings, Crosshair, Check, Droplet, ChartArea, Calendar } from "lucide-react";
 
 export const menuItems = [
     { name: "Dashboard", icon: Home, href: "/dashboard" },
@@ -11,4 +11,6 @@ export const menuItems = [
     { name: "WhatsApp", icon: ChartArea, href: "/dashboard/whatsapp" },
     { name: "Confirmación", icon: Check, href: "/dashboard/confirmation" },
     { name: "Configuración", icon: Settings, href: "/dashboard/settings" },
+    { name: "Calendario", icon: Calendar, href: "/dashboard/calendar" },
+
 ];

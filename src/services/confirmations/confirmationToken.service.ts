@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { supabaseClient } from "@/lib/supabaseClient";
+import { supabaseClient } from "@/lib/supabase-client";
 
 export async function getOrCreateConfirmationToken(
     appointmentId: string
