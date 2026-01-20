@@ -6,7 +6,7 @@
  * Clean and modern layout with Colombian currency formatting.
  */
 
-import { useEmployees } from "@/hooks/employees/useEmployees";
+import { useEmployees } from "@/hooks/employees/useEmployees/useEmployees";
 import { useEmployeeEarnings } from "@/hooks/employees/useEmployeeEarnings";
 import { useState } from "react";
 

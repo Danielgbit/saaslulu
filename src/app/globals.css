@@ -26,29 +26,172 @@ body {
 }
 
 
+/* =========================================================
+   FULLCALENDAR – CUSTOM DARK UI / UX
+   ========================================================= */
 
-/* ============================= */
-/* FullCalendar custom styles   */
-/* ============================= */
+/* ---------------------------------------------------------
+   1️⃣ GRID PRINCIPAL (líneas del calendario)
+   --------------------------------------------------------- */
 
+/* Líneas horizontales que separan los slots horarios */
+.fc .fc-timegrid-slot {
+  /* Color gris oscuro, bajo contraste para no distraer */
+  border-color: rgba(75, 75, 75, 0.676);
+}
+
+/* Líneas verticales que separan los días */
+.fc .fc-timegrid-col {
+  /* Color rojo temporal (puedes suavizar luego) */
+  border-color: rgba(216, 1, 1, 0.644);
+}
+
+
+/* ---------------------------------------------------------
+   2️⃣ ETIQUETAS DE HORA (lado izquierdo)
+   --------------------------------------------------------- */
+
+/* Horas completas (08:00, 09:00, etc.) */
+.fc .fc-timegrid-slot-label {
+  /* Gris claro legible en dark mode */
+  color: #a3a3a3;
+  /* Un poco más de peso para jerarquía visual */
+  font-weight: 500;
+}
+
+/* Media hora (08:30, 09:30, etc.) */
+.fc .fc-timegrid-slot.fc-timegrid-slot-minor {
+  /* Línea punteada para diferenciarla de la hora completa */
+  border-top-style: dashed;
+  /* Muy sutil para no recargar el grid */
+  border-top-color: rgba(255, 255, 255, 0.03);
+}
+
+
+/* ---------------------------------------------------------
+   3️⃣ DÍA ACTUAL (columna resaltada)
+   --------------------------------------------------------- */
+
+/* Fondo del día actual */
+.fc .fc-day-today {
+  /* Gradiente suave para destacar sin molestar */
+  background: linear-gradient(
+    to bottom,
+    rgba(16, 185, 129, 0.08),
+    rgba(16, 185, 129, 0.02)
+  ) !important;
+}
+
+
+/* ---------------------------------------------------------
+   4️⃣ INDICADOR DE HORA ACTUAL (línea horizontal)
+   --------------------------------------------------------- */
+
+/* Línea que marca la hora actual */
+.fc .fc-now-indicator-line {
+  /* Verde emerald consistente con tu UI */
+  border-color: #10b981;
+  /* Un poco más gruesa para que se note */
+  border-width: 2px;
+  /* Glow sutil tipo SaaS premium */
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+
+/* ---------------------------------------------------------
+   5️⃣ BORDES GENERALES (limpieza visual)
+   --------------------------------------------------------- */
+
+/* Quita el look de tabla HTML clásica */
+.fc-theme-standard td,
+.fc-theme-standard th {
+  /* Bordes muy suaves */
+  border-color: rgba(155, 17, 17, 0.06);
+}
+
+
+/* ---------------------------------------------------------
+   6️⃣ HEADER DE DÍAS (barra superior)
+   --------------------------------------------------------- */
+
+/* Contenedor general del header */
 .fc .fc-col-header {
-  background-color: #020617;
-  border-bottom: 1px solid #fbfbfb;
+  /* Fondo apenas visible */
+  background: rgba(255, 255, 255, 0.02);
+  /* Línea inferior para separar del grid */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Cada celda de día (LUN, MAR, etc.) */
 .fc .fc-col-header-cell {
-  background-color: transparent;
-  border-color: #1f2933;
+  /* Espacio vertical para que respire */
+  padding: 10px 0;
+  /* Separador entre días */
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  /* Fondo base */
+  background: rgba(255, 255, 255, 0.02);
 }
 
+/* Texto interno del header (día + fecha) */
 .fc .fc-col-header-cell-cushion {
-  color: #9ca3af;
-  font-size: 12px;
-  font-weight: 600;
+  /* Layout vertical */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Espacio entre día y número */
+  gap: 2px;
+
+  /* Tipografía pequeña tipo SaaS */
+  font-size: 11px;
+  font-weight: 500;
+  color: #a3a3a3;
   text-transform: uppercase;
-  padding: 8px 0;
 }
 
-.fc .fc-day-today .fc-col-header-cell-cushion {
-  color: #ff0000;
+/* Pseudo-elemento (no usado, preparado para futuras mejoras) */
+.fc .fc-col-header-cell-cushion::after {
+  content: attr(data-date);
+  display: none;
+}
+
+/* Header del día actual */
+.fc .fc-col-header-cell.fc-day-today {
+  /* Verde suave para reforzar contexto */
+  background: rgba(16, 185, 129, 0.12);
+}
+
+/* Hover sobre los días (feedback visual) */
+.fc .fc-col-header-cell:hover {
+  /* Color temporal (puedes cambiar a blanco sutil luego) */
+  background: rgba(180, 7, 7, 0.04);
+  cursor: pointer;
+}
+
+/* Elimina bordes innecesarios del header */
+.fc .fc-scrollgrid-section-header td {
+  border: none;
+}
+
+
+/* ================================
+   RESET SEGURO FULLCALENDAR
+================================ */
+
+/* Grid */
+.fc .fc-scrollgrid {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* Eventos */
+.fc .fc-event {
+  border-radius: 10px;
+  background-color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Texto eventos */
+.fc .fc-event-title,
+.fc .fc-event-time {
+  color: white;
 }
