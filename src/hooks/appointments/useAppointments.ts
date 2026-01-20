@@ -5,6 +5,7 @@ import {
   updateAppointment,
   deleteAppointment,
 } from "@/services/appointments/appointments.service"
+import type { Service } from "@/types/services"
 
 type DateRange = {
   start: Date
@@ -13,7 +14,8 @@ type DateRange = {
 
 export function useAppointments(
   employeeId: string,
-  range?: DateRange
+  range?: DateRange,
+  services?: Service[] // 👈 IMPORTANTE
 ) {
   const [appointments, setAppointments] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -24,7 +26,7 @@ export function useAppointments(
      ========================= */
   useEffect(() => {
     if (!employeeId || !range?.start || !range?.end) {
-      setAppointments([]) // 🧹 limpiar estado
+      setAppointments([])
       return
     }
 
@@ -46,57 +48,52 @@ export function useAppointments(
         }
       } catch (err) {
         if (!cancelled) {
-          console.error("❌ Error loading appointments:", err)
+          console.error("❌ Error loading appointments", err)
           setError("No se pudieron cargar las citas")
           setAppointments([])
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false)
-        }
+        if (!cancelled) setLoading(false)
       }
     }
 
     fetchAppointments()
-
     return () => {
       cancelled = true
     }
   }, [employeeId, range?.start, range?.end])
 
   /* =========================
-     CREATE
-     ========================= */
-  async function create(data: any) {
-    const created = await createAppointment(data)
-
-    setAppointments((prev) => [...prev, created])
-
-    return created
-  }
-
-  /* =========================
-     UPDATE (🔥 FIX IMPORTANTE)
+     UPDATE (🔥 FIX AQUÍ)
      ========================= */
   async function update(data: any) {
     const updated = await updateAppointment(data)
 
     setAppointments((prev) =>
-      prev.map((a) =>
-        a.id === updated.id
-          ? {
-              ...a,              // 🔒 mantenemos datos previos
-              ...updated,        // 🆕 nuevos campos
-              services:
-                updated.services ??
-                a.services ??
-                [],               // ✅ NO perder servicio
-            }
-          : a
-      )
+      prev.map((a) => {
+        if (a.id !== updated.id) return a
+
+        const service =
+          services?.find((s) => s.id === updated.service_id) ?? null
+
+        return {
+          ...updated,
+          // 🔥 REHIDRATAR RELACIÓN
+          services: service ? [service] : a.services,
+        }
+      })
     )
 
     return updated
+  }
+
+  /* =========================
+     CREATE
+     ========================= */
+  async function create(data: any) {
+    const created = await createAppointment(data)
+    setAppointments((prev) => [...prev, created])
+    return created
   }
 
   /* =========================
@@ -104,7 +101,6 @@ export function useAppointments(
      ========================= */
   async function remove(id: string) {
     await deleteAppointment(id)
-
     setAppointments((prev) =>
       prev.filter((a) => a.id !== id)
     )
