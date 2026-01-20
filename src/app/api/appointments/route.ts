@@ -5,6 +5,9 @@ import { createSupabaseServerClient } from "@/lib/supabase-server"
 /* =========================
    GET – listar citas
 ========================= */
+/* =========================
+   GET – listar citas
+========================= */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
 
@@ -12,6 +15,9 @@ export async function GET(req: Request) {
   const end = searchParams.get("end")
   const employeeId = searchParams.get("employeeId")
 
+  /* =========================
+     Validación
+  ========================= */
   if (!start || !end || !employeeId) {
     return NextResponse.json(
       { error: "Missing params" },
@@ -19,12 +25,18 @@ export async function GET(req: Request) {
     )
   }
 
-  // Cliente público (sin auth)
+  /* =========================
+     Supabase client (public)
+  ========================= */
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
+  /* =========================
+     Query
+     (1 cita → 1 servicio)
+  ========================= */
   const { data, error } = await supabase
     .from("appointments")
     .select(`
@@ -34,12 +46,18 @@ export async function GET(req: Request) {
       status,
       client_name,
       employee_id,
-      services ( name )
+      service_id,
+      service:service_id (
+        name
+      )
     `)
     .eq("employee_id", employeeId)
     .gte("start_at", start)
     .lte("end_at", end)
 
+  /* =========================
+     Error handling
+  ========================= */
   if (error) {
     return NextResponse.json(
       { error: error.message },
@@ -47,6 +65,9 @@ export async function GET(req: Request) {
     )
   }
 
+  /* =========================
+     Success
+  ========================= */
   return NextResponse.json(data)
 }
 

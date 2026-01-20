@@ -11,6 +11,7 @@ type Props = {
   onDelete: (payload: any) => void
 }
 
+
 export function CalendarView({
   events,
   onEdit,

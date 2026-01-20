@@ -19,6 +19,9 @@ export function useAppointments(
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  /* =========================
+     FETCH
+     ========================= */
   useEffect(() => {
     if (!employeeId || !range?.start || !range?.end) {
       setAppointments([]) // 🧹 limpiar estado
@@ -43,7 +46,7 @@ export function useAppointments(
         }
       } catch (err) {
         if (!cancelled) {
-          console.error("Error loading appointments", err)
+          console.error("❌ Error loading appointments:", err)
           setError("No se pudieron cargar las citas")
           setAppointments([])
         }
@@ -62,25 +65,46 @@ export function useAppointments(
   }, [employeeId, range?.start, range?.end])
 
   /* =========================
-     CRUD ACTIONS
+     CREATE
      ========================= */
-
   async function create(data: any) {
     const created = await createAppointment(data)
+
     setAppointments((prev) => [...prev, created])
+
     return created
   }
 
+  /* =========================
+     UPDATE (🔥 FIX IMPORTANTE)
+     ========================= */
   async function update(data: any) {
     const updated = await updateAppointment(data)
+
     setAppointments((prev) =>
-      prev.map((a) => (a.id === updated.id ? updated : a))
+      prev.map((a) =>
+        a.id === updated.id
+          ? {
+              ...a,              // 🔒 mantenemos datos previos
+              ...updated,        // 🆕 nuevos campos
+              services:
+                updated.services ??
+                a.services ??
+                [],               // ✅ NO perder servicio
+            }
+          : a
+      )
     )
+
     return updated
   }
 
+  /* =========================
+     DELETE
+     ========================= */
   async function remove(id: string) {
     await deleteAppointment(id)
+
     setAppointments((prev) =>
       prev.filter((a) => a.id !== id)
     )

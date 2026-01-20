@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { toast } from "sonner"
 
 import EmployeeCalendar from "@/components/calendar/EmployeeCalendar"
@@ -8,6 +8,7 @@ import EditAppointmentModal from "@/components/calendar/EditAppointmentModal"
 
 import { useEmployees } from "@/hooks/employees/useEmployees/useEmployees"
 import { useAppointments } from "@/hooks/appointments/useAppointments"
+import { useServices } from "@/hooks/services/useServices"
 
 import type { CalendarEvent } from "@/components/calendar/calendar.types"
 import type { EditableAppointment } from "@/types/appointments/editable-appointment"
@@ -17,6 +18,7 @@ import type { EditableAppointment } from "@/types/appointments/editable-appointm
 ================================= */
 function getWeekRange() {
   const now = new Date()
+
   const start = new Date(now)
   start.setDate(now.getDate() - now.getDay() + 1)
   start.setHours(0, 0, 0, 0)
@@ -55,6 +57,11 @@ export default function CalendarPage() {
     remove,
   } = useAppointments(selectedEmployeeId, range)
 
+  const {
+    services,
+    loading: servicesLoading,
+  } = useServices()
+
   /* ================================
      Transform → FullCalendar
   ================================= */
@@ -67,7 +74,10 @@ export default function CalendarPage() {
         end: new Date(a.end_at),
         extendedProps: {
           status: a.status,
-          serviceName: a.services?.[0]?.name,
+          employee_id: a.employee_id,
+          service_id: a.service_id,
+          // 🔥 CLAVE: relación 1 cita → 1 servicio
+          serviceName: a.service?.name ?? "Servicio",
         },
       })),
     [appointments]
@@ -76,7 +86,7 @@ export default function CalendarPage() {
   /* ================================
      Handlers
   ================================= */
-  const handleDelete = (appointment: any) => {
+  const handleDelete = (appointment: { id: string }) => {
     toast.warning("¿Eliminar esta cita?", {
       description: "Esta acción no se puede deshacer",
       action: {
@@ -85,7 +95,8 @@ export default function CalendarPage() {
           try {
             await remove(appointment.id)
             toast.success("Cita eliminada correctamente")
-          } catch {
+          } catch (err) {
+            console.error("❌ Error eliminando cita:", err)
             toast.error("No se pudo eliminar la cita")
           }
         },
@@ -98,41 +109,28 @@ export default function CalendarPage() {
       id: event.id,
       client_name: event.title,
       status: event.extendedProps.status,
+      employee_id: event.extendedProps.employee_id,
+      service_id: event.extendedProps.service_id,
+      start_at: event.start.toISOString(),
+      end_at: event.end.toISOString(),
     })
   }
 
   /* ================================
      UI States
   ================================= */
-  if (employeesLoading) {
+  if (employeesLoading || appointmentsLoading || servicesLoading) {
     return (
       <div className="p-6 text-sm text-neutral-400">
-        Cargando empleados...
+        Cargando datos...
       </div>
     )
   }
 
-  if (employeesError) {
+  if (employeesError || appointmentsError) {
     return (
       <div className="p-6 text-sm text-red-400">
-        {employeesError}
-      </div>
-    )
-  }
-
-
-  if (appointmentsLoading) {
-    return (
-      <div className="p-6 text-sm text-neutral-400">
-        Cargando citas...
-      </div>
-    )
-  }
-
-  if (appointmentsError) {
-    return (
-      <div className="p-6 text-sm text-red-400">
-        {appointmentsError}
+        {employeesError || appointmentsError}
       </div>
     )
   }
@@ -153,10 +151,18 @@ export default function CalendarPage() {
 
       <EditAppointmentModal
         appointment={editingAppointment}
+        employees={employees}
+        services={services}
         onClose={() => setEditingAppointment(null)}
         onSave={async (data) => {
-          await update(data)
-          toast.success("Cita actualizada correctamente")
+          try {
+            await update(data)
+            toast.success("Cita actualizada correctamente")
+            setEditingAppointment(null)
+          } catch (err) {
+            console.error("❌ Error actualizando cita:", err)
+            toast.error("No se pudo actualizar la cita")
+          }
         }}
       />
     </>

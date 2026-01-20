@@ -1,7 +1,16 @@
-import { Appointment } from "./appointments";
+// src/types/appointments/editable-appointment.ts
+export type EditableAppointmentStatus =
+  | "scheduled"
+  | "confirmed"
+  | "in-progress"
+  | "completed"
 
-// types/appointments/editable-appointment.ts
-export type EditableAppointment = Pick<
-  Appointment,
-  "id" | "client_name" | "status"
->
+export interface EditableAppointment {
+  id: string
+  client_name: string
+  status: EditableAppointmentStatus
+  employee_id: string | null
+  service_id: string | null
+  start_at: string
+  end_at: string
+}
