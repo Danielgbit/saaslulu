@@ -1,10 +1,10 @@
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import EmployeeCalendar from "@/components/calendar/EmployeeCalendar"
-import EditAppointmentModal from "@/components/calendar/EditAppointmentModal"
+import EditAppointmentModal from "@/components/calendar/AppointmentFormModal"
 
 import { useEmployees } from "@/hooks/employees/useEmployees/useEmployees"
 import { useAppointments } from "@/hooks/appointments/useAppointments"
@@ -53,6 +53,7 @@ export default function CalendarPage() {
     appointments,
     loading: appointmentsLoading,
     error: appointmentsError,
+    create,
     update,
     remove,
   } = useAppointments(selectedEmployeeId, range)
@@ -76,8 +77,7 @@ export default function CalendarPage() {
           status: a.status,
           employee_id: a.employee_id,
           service_id: a.service_id,
-          // 🔥 CLAVE: relación 1 cita → 1 servicio
-          serviceName: a.service?.name ?? "Servicio",
+          serviceName: a.services?.[0]?.name ?? "Servicio",
         },
       })),
     [appointments]
@@ -116,6 +116,23 @@ export default function CalendarPage() {
     })
   }
 
+  const handleCreate = (info: any) => {
+    if (!selectedEmployeeId) {
+      toast.warning("Selecciona un empleado primero")
+      return
+    }
+
+    setEditingAppointment({
+      id: "",
+      client_name: "",
+      status: "scheduled",
+      employee_id: selectedEmployeeId,
+      service_id: null,
+      start_at: info.start.toISOString(),
+      end_at: info.end.toISOString(),
+    })
+  }
+
   /* ================================
      UI States
   ================================= */
@@ -147,6 +164,7 @@ export default function CalendarPage() {
         onEmployeeChange={setSelectedEmployeeId}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onCreate={handleCreate}
       />
 
       <EditAppointmentModal
@@ -156,12 +174,21 @@ export default function CalendarPage() {
         onClose={() => setEditingAppointment(null)}
         onSave={async (data) => {
           try {
-            await update(data)
-            toast.success("Cita actualizada correctamente")
+            if (data.id) {
+              await update(data)
+              toast.success("Cita actualizada correctamente")
+            } else {
+              await create({
+                ...data,
+                client_phone: data.client_phone,
+              })
+              toast.success("Cita creada correctamente")
+            }
+
             setEditingAppointment(null)
           } catch (err) {
-            console.error("❌ Error actualizando cita:", err)
-            toast.error("No se pudo actualizar la cita")
+            console.error("❌ Error guardando cita:", err)
+            toast.error("No se pudo guardar la cita")
           }
         }}
       />

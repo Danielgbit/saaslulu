@@ -5,9 +5,6 @@ import { createSupabaseServerClient } from "@/lib/supabase-server"
 /* =========================
    GET – listar citas
 ========================= */
-/* =========================
-   GET – listar citas
-========================= */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
 

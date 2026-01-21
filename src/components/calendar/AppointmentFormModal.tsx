@@ -1,43 +1,61 @@
 "use client"
 
 import { X } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import type { EditableAppointment } from "@/types/appointments/editable-appointment"
-import type { Employee } from "@/components/calendar/calendar.types"
-import type { Service } from "@/types/services"
+import type { AppointmentFormProps } from "@/components/calendar/calendar.types"
 
-type Props = {
-  appointment: EditableAppointment | null
-  employees: Employee[]
-  services: Service[]
-  onClose: () => void
-  onSave: (data: EditableAppointment) => Promise<void>
-}
-
-export default function EditAppointmentModal({
+export default function AppointmentFormModal({
   appointment,
   employees,
   services,
   onClose,
   onSave,
-}: Props) {
-  if (!appointment) return null
+}: AppointmentFormProps) {
+  const isOpen = Boolean(appointment)
+  const isEdit = Boolean(appointment?.id)
 
-  const [form, setForm] = useState<EditableAppointment>({
-    ...appointment,
-  })
+  const [form, setForm] = useState<
+    (EditableAppointment & { client_phone: string }) | null
+  >(null)
 
   const [loading, setLoading] = useState(false)
 
-  function updateField<K extends keyof EditableAppointment>(
+  /* ================================
+     Sync form when appointment changes
+  ================================= */
+  useEffect(() => {
+    if (!appointment) {
+      setForm(null)
+      return
+    }
+
+    setForm({
+      ...appointment,
+      client_phone: "",
+    })
+  }, [appointment])
+
+  /* ================================
+     Guard: modal closed
+  ================================= */
+  if (!isOpen || !form) return null
+
+  function updateField<K extends keyof typeof form>(
     key: K,
-    value: EditableAppointment[K]
+    value: (typeof form)[K]
   ) {
-    setForm((prev) => ({ ...prev, [key]: value }))
+    setForm((prev) =>
+      prev ? { ...prev, [key]: value } : prev
+    )
   }
 
   async function handleSave() {
+    if (!isOpen || !form) return null
+    const safeForm = form
+
+
     try {
       setLoading(true)
       await onSave(form)
@@ -52,7 +70,7 @@ export default function EditAppointmentModal({
         {/* ================= Header ================= */}
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-white">
-            Editar cita
+            {isEdit ? "Editar cita" : "Nueva cita"}
           </h3>
 
           <button onClick={onClose}>
@@ -63,14 +81,29 @@ export default function EditAppointmentModal({
         {/* ================= Cliente ================= */}
         <div className="mb-3">
           <label className="block text-sm text-neutral-400">
-            Cliente
+            Nombre del cliente
           </label>
           <input
-            value={form.client_name}
+            value={form.client_name ?? ""}
             onChange={(e) =>
               updateField("client_name", e.target.value)
             }
             className="w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-white"
+          />
+        </div>
+
+        {/* ================= Teléfono ================= */}
+        <div className="mb-3">
+          <label className="block text-sm text-neutral-400">
+            Teléfono *
+          </label>
+          <input
+            value={form.client_phone}
+            onChange={(e) =>
+              updateField("client_phone", e.target.value)
+            }
+            className="w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-white"
+            placeholder="Ej: 3001234567"
           />
         </div>
 
@@ -176,7 +209,7 @@ export default function EditAppointmentModal({
             disabled={loading}
             className="rounded bg-emerald-600 px-4 py-2 text-sm text-white disabled:opacity-50"
           >
-            Guardar
+            {isEdit ? "Guardar cambios" : "Crear cita"}
           </button>
         </div>
       </div>

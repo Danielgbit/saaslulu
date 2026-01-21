@@ -11,12 +11,12 @@ type Props = {
   onEmployeeChange: (id: string) => void
   onEdit: (appointment: any) => void
   onDelete: (appointment: any) => void
+  onCreate: (info: any) => void
 
-  // 🆕 estados de data
+  // 🆕 estados de data (opcional, por ahora no usados)
   loading?: boolean
   error?: string | null
 }
-
 
 export default function EmployeeCalendar({
   events,
@@ -25,6 +25,7 @@ export default function EmployeeCalendar({
   onEmployeeChange,
   onEdit,
   onDelete,
+  onCreate,
 }: Props) {
   return (
     <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
@@ -38,6 +39,7 @@ export default function EmployeeCalendar({
         events={events}
         onEdit={onEdit}
         onDelete={onDelete}
+        onCreate={onCreate}
       />
     </div>
   )
