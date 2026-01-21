@@ -6,6 +6,12 @@ import { useEffect, useState } from "react"
 import type { EditableAppointment } from "@/types/appointments/editable-appointment"
 import type { AppointmentFormProps } from "@/components/calendar/calendar.types"
 
+/* ================================
+   Types
+================================= */
+type AppointmentFormData =
+  EditableAppointment & { client_phone: string }
+
 export default function AppointmentFormModal({
   appointment,
   employees,
@@ -16,10 +22,7 @@ export default function AppointmentFormModal({
   const isOpen = Boolean(appointment)
   const isEdit = Boolean(appointment?.id)
 
-  const [form, setForm] = useState<
-    (EditableAppointment & { client_phone: string }) | null
-  >(null)
-
+  const [form, setForm] = useState<AppointmentFormData | null>(null)
   const [loading, setLoading] = useState(false)
 
   /* ================================
@@ -42,9 +45,11 @@ export default function AppointmentFormModal({
   ================================= */
   if (!isOpen || !form) return null
 
-  function updateField<K extends keyof typeof form>(
+  const safeForm = form
+
+  function updateField<K extends keyof AppointmentFormData>(
     key: K,
-    value: (typeof form)[K]
+    value: AppointmentFormData[K]
   ) {
     setForm((prev) =>
       prev ? { ...prev, [key]: value } : prev
@@ -52,13 +57,12 @@ export default function AppointmentFormModal({
   }
 
   async function handleSave() {
-    if (!isOpen || !form) return null
-    const safeForm = form
-
+    if (!safeForm.employee_id || !safeForm.start_at || !safeForm.end_at) return
+    if (!safeForm.client_phone.trim()) return
 
     try {
       setLoading(true)
-      await onSave(form)
+      await onSave(safeForm)
     } finally {
       setLoading(false)
     }
@@ -84,7 +88,7 @@ export default function AppointmentFormModal({
             Nombre del cliente
           </label>
           <input
-            value={form.client_name ?? ""}
+            value={safeForm.client_name ?? ""}
             onChange={(e) =>
               updateField("client_name", e.target.value)
             }
@@ -98,7 +102,7 @@ export default function AppointmentFormModal({
             Teléfono *
           </label>
           <input
-            value={form.client_phone}
+            value={safeForm.client_phone}
             onChange={(e) =>
               updateField("client_phone", e.target.value)
             }
@@ -113,12 +117,9 @@ export default function AppointmentFormModal({
             Empleado
           </label>
           <select
-            value={form.employee_id ?? ""}
+            value={safeForm.employee_id ?? ""}
             onChange={(e) =>
-              updateField(
-                "employee_id",
-                e.target.value || null
-              )
+              updateField("employee_id", e.target.value || null)
             }
             className="w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-white"
           >
@@ -137,12 +138,9 @@ export default function AppointmentFormModal({
             Servicio
           </label>
           <select
-            value={form.service_id ?? ""}
+            value={safeForm.service_id ?? ""}
             onChange={(e) =>
-              updateField(
-                "service_id",
-                e.target.value || null
-              )
+              updateField("service_id", e.target.value || null)
             }
             className="w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-white"
           >
@@ -162,7 +160,7 @@ export default function AppointmentFormModal({
           </label>
           <input
             type="datetime-local"
-            value={form.start_at.slice(0, 16)}
+            value={safeForm.start_at.slice(0, 16)}
             onChange={(e) =>
               updateField(
                 "start_at",
@@ -179,11 +177,11 @@ export default function AppointmentFormModal({
             Estado
           </label>
           <select
-            value={form.status}
+            value={safeForm.status}
             onChange={(e) =>
               updateField(
                 "status",
-                e.target.value as EditableAppointment["status"]
+                e.target.value as AppointmentFormData["status"]
               )
             }
             className="w-full rounded bg-neutral-800 border border-neutral-700 px-3 py-2 text-white"
