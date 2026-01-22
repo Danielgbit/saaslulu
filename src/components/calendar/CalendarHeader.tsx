@@ -1,6 +1,6 @@
 "use client"
 
-import { Employee } from "./calendar.types"
+import { Employee } from "../../types/calendar.types"
 
 type Props = {
   employees: Employee[]

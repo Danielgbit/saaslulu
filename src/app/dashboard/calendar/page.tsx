@@ -1,16 +1,16 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { toast } from "sonner"
 
 import EmployeeCalendar from "@/components/calendar/EmployeeCalendar"
-import EditAppointmentModal from "@/components/calendar/AppointmentFormModal"
+import AppointmentFormModal from "@/components/calendar/AppointmentFormModal"
 
 import { useEmployees } from "@/hooks/employees/useEmployees/useEmployees"
 import { useAppointments } from "@/hooks/appointments/useAppointments"
 import { useServices } from "@/hooks/services/useServices"
 
-import type { CalendarEvent } from "@/components/calendar/calendar.types"
+import type { CalendarEvent } from "@/types/calendar.types"
 import type { EditableAppointment } from "@/types/appointments/editable-appointment"
 
 /* ================================
@@ -50,18 +50,23 @@ export default function CalendarPage() {
   } = useEmployees()
 
   const {
+    services,
+    loading: servicesLoading,
+  } = useServices()
+
+  const {
     appointments,
     loading: appointmentsLoading,
     error: appointmentsError,
     create,
     update,
     remove,
-  } = useAppointments(selectedEmployeeId, range)
+  } = useAppointments(selectedEmployeeId, range, services)
 
-  const {
-    services,
-    loading: servicesLoading,
-  } = useServices()
+  useEffect(() => {
+    console.log("📅 appointments:", appointments)
+  }, [appointments])
+  
 
   /* ================================
      Transform → FullCalendar
@@ -77,6 +82,7 @@ export default function CalendarPage() {
           status: a.status,
           employee_id: a.employee_id,
           service_id: a.service_id,
+          client_phone: a.client_phone, // ✅ PROPAGADO
           serviceName: a.services?.[0]?.name ?? "Servicio",
         },
       })),
@@ -108,6 +114,7 @@ export default function CalendarPage() {
     setEditingAppointment({
       id: event.id,
       client_name: event.title,
+      client_phone: event.extendedProps.client_phone ?? "",
       status: event.extendedProps.status,
       employee_id: event.extendedProps.employee_id,
       service_id: event.extendedProps.service_id,
@@ -125,6 +132,7 @@ export default function CalendarPage() {
     setEditingAppointment({
       id: "",
       client_name: "",
+      client_phone: "",
       status: "scheduled",
       employee_id: selectedEmployeeId,
       service_id: null,
@@ -167,7 +175,7 @@ export default function CalendarPage() {
         onCreate={handleCreate}
       />
 
-      <EditAppointmentModal
+      <AppointmentFormModal
         appointment={editingAppointment}
         employees={employees}
         services={services}
@@ -178,10 +186,7 @@ export default function CalendarPage() {
               await update(data)
               toast.success("Cita actualizada correctamente")
             } else {
-              await create({
-                ...data,
-                client_phone: data.client_phone,
-              })
+              await create(data)
               toast.success("Cita creada correctamente")
             }
 

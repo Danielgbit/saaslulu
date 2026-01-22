@@ -8,6 +8,7 @@ export type EditableAppointmentStatus =
 export interface EditableAppointment {
   id: string
   client_name: string
+  client_phone?: string
   status: EditableAppointmentStatus
   employee_id: string | null
   service_id: string | null

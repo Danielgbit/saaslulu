@@ -15,7 +15,7 @@ type DateRange = {
 export function useAppointments(
   employeeId: string,
   range?: DateRange,
-  services?: Service[] // 👈 IMPORTANTE
+  services: Service[] = [] // 🔥 DEFAULT IMPORTANTE
 ) {
   const [appointments, setAppointments] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -33,18 +33,26 @@ export function useAppointments(
     let cancelled = false
 
     async function fetchAppointments() {
+      if (!range) return
+      
       try {
         setLoading(true)
         setError(null)
 
         const data = await getAppointments({
           employeeId,
-          start: range?.start.toISOString(),
-          end: range?.end.toISOString(),
+          start: range.start.toISOString(),
+          end: range.end.toISOString(),
         })
 
         if (!cancelled) {
-          setAppointments(data)
+          setAppointments(
+            data.map((a: any) => ({
+              ...a,
+              // 🔥 NORMALIZACIÓN ÚNICA
+              services: a.service ? [a.service] : [],
+            }))
+          )
         }
       } catch (err) {
         if (!cancelled) {
@@ -64,36 +72,43 @@ export function useAppointments(
   }, [employeeId, range?.start, range?.end])
 
   /* =========================
-     UPDATE (🔥 FIX AQUÍ)
+     UPDATE (rehidratado)
      ========================= */
   async function update(data: any) {
     const updated = await updateAppointment(data)
 
+    const service =
+      services.find((s) => s.id === updated.service_id) ?? null
+
+    const hydrated = {
+      ...updated,
+      services: service ? [service] : [],
+    }
+
     setAppointments((prev) =>
-      prev.map((a) => {
-        if (a.id !== updated.id) return a
-
-        const service =
-          services?.find((s) => s.id === updated.service_id) ?? null
-
-        return {
-          ...updated,
-          // 🔥 REHIDRATAR RELACIÓN
-          services: service ? [service] : a.services,
-        }
-      })
+      prev.map((a) => (a.id === hydrated.id ? hydrated : a))
     )
 
-    return updated
+    return hydrated
   }
 
   /* =========================
-     CREATE
+     CREATE (rehidratado)
      ========================= */
   async function create(data: any) {
     const created = await createAppointment(data)
-    setAppointments((prev) => [...prev, created])
-    return created
+
+    const service =
+      services.find((s) => s.id === created.service_id) ?? null
+
+    const hydrated = {
+      ...created,
+      services: service ? [service] : [],
+    }
+
+    setAppointments((prev) => [...prev, hydrated])
+
+    return hydrated
   }
 
   /* =========================
@@ -101,9 +116,7 @@ export function useAppointments(
      ========================= */
   async function remove(id: string) {
     await deleteAppointment(id)
-    setAppointments((prev) =>
-      prev.filter((a) => a.id !== id)
-    )
+    setAppointments((prev) => prev.filter((a) => a.id !== id))
   }
 
   return {

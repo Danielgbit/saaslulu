@@ -37,20 +37,22 @@ export async function GET(req: Request) {
   const { data, error } = await supabase
     .from("appointments")
     .select(`
-      id,
-      start_at,
-      end_at,
-      status,
-      client_name,
-      employee_id,
-      service_id,
-      service:service_id (
-        name
-      )
-    `)
+    id,
+    start_at,
+    end_at,
+    status,
+    client_name,
+    client_phone,
+    employee_id,
+    service_id,
+    service:service_id (
+      name
+    )
+  `)
     .eq("employee_id", employeeId)
     .gte("start_at", start)
     .lte("end_at", end)
+
 
   /* =========================
      Error handling
@@ -65,8 +67,14 @@ export async function GET(req: Request) {
   /* =========================
      Success
   ========================= */
+
+  console.log("Inicio", data?.[0]?.start_at)
+  console.log("Fin", data?.[0]?.end_at)
+
+
   return NextResponse.json(data)
 }
+
 
 /* =========================
    POST – crear cita
@@ -77,12 +85,13 @@ export async function POST(req: Request) {
   const {
     employee_id,
     client_name,
+    client_phone,
     service_id,
     start_at,
     end_at,
   } = body
 
-  if (!employee_id || !start_at || !end_at) {
+  if (!employee_id || !start_at || !end_at || !client_phone) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 }
@@ -96,6 +105,7 @@ export async function POST(req: Request) {
     .insert({
       employee_id,
       client_name,
+      client_phone,
       service_id,
       start_at,
       end_at,
@@ -113,6 +123,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json(data)
 }
+
 
 /* =========================
    PUT – actualizar cita

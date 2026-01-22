@@ -1,6 +1,6 @@
 "use client"
 
-import { Employee, CalendarEvent } from "./calendar.types"
+import { Employee, CalendarEvent } from "../../types/calendar.types"
 import { CalendarHeader } from "./CalendarHeader"
 import { CalendarView } from "./CalendarView"
 

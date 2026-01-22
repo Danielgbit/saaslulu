@@ -3,7 +3,7 @@
 import FullCalendar from "@fullcalendar/react"
 import { CALENDAR_CONFIG, CALENDAR_PLUGINS } from "./calendar.constants"
 import { CalendarEventItem } from "./CalendarEventItem"
-import type { CalendarEvent } from "./calendar.types"
+import type { CalendarEvent } from "../../types/calendar.types"
 
 type Props = {
   events: CalendarEvent[]
