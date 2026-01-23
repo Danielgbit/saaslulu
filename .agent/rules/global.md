@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Global Rules – Antigravity SaaS
 
 This is a production-grade SaaS built with Next.js (App Router) and TypeScript.
