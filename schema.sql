@@ -1,6 +1,16 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.appointment_confirmations (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  appointment_id uuid NOT NULL,
+  token text NOT NULL UNIQUE,
+  used boolean DEFAULT false,
+  expires_at timestamp with time zone NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT appointment_confirmations_pkey PRIMARY KEY (id),
+  CONSTRAINT appointment_confirmations_appointment_fkey FOREIGN KEY (appointment_id) REFERENCES public.appointments(id)
+);
 CREATE TABLE public.appointments (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
   client_phone character varying NOT NULL,
