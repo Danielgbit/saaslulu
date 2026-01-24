@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import {
     getFinancialMovementsByDate,
     createFinancialMovement
-} from '@/services/financial-movements.service'
+} from '@/services/financial/financialMovements.service'
 import { financialMovementSchema } from '@/validators/financialMovement.schema'
 
 /**
