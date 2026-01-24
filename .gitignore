@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# windsurf
+.windsurf
+
+# antigravity
+.antigravity
+
+# windsurf
+.windsurf
