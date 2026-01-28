@@ -1,19 +1,25 @@
-"use client";
+type CompleteServicePayload = {
+    appointmentId: string
+    employeeId: string
+    serviceName: string
+    servicePrice: number
+    durationMinutes: number
+    notes?: string
+}
 
-import { useEffect, useState } from "react";
-import { getAllServices } from "@/services/services/services.service";
-import { Service } from "@/types/services";
+export function useServices() {
+    const completeService = async (payload: CompleteServicePayload) => {
+        const res = await fetch('/api/services/complete', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+        })
 
-export const useServices = () => {
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
+        if (!res.ok) {
+            throw new Error('Failed to complete service')
+        }
+    }
 
-    useEffect(() => {
-        getAllServices().then((res: Service[]) => {
-            setServices(res || []);
-            setLoading(false);
-        });
-    }, []);
-
-    return { services, loading };
-};
+    return {
+        completeService,
+    }
+}
